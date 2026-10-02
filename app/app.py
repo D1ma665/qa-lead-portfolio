@@ -270,4 +270,4 @@ def nav():
         ui.button("📥 Экспорт", on_click=lambda: ui.navigate.to("/export")).props("flat")
 
 
-ui.run(title=APP_NAME, dark=False, reload=False)
+ui.run(title=APP_NAME, dark=False, reload=False, host="0.0.0.0", port=8080)
