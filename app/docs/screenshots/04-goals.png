@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html dir="ltr" style="scroll-padding-top: 64px;"><script src="04-goals_files/prompt_-mMu.js"></script><script src="04-goals_files/runScript_-mMu.js"></script><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>QA Grading System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta id="nicegui-color-scheme" name="color-scheme" content="light">
+    <link href="http://127.0.0.1:8080/_nicegui/3.17.1/static/favicon.ico" rel="shortcut icon">
+    <style>
+      @layer theme, base, quasar, nicegui, components, utilities, overrides, quasar_importants;
+      @import url("/_nicegui/3.17.1/static/fonts.css") layer(base);
+      
+        @import url("/_nicegui/3.17.1/static/quasar.unimportant.prod.css") layer(quasar);
+        @import url("/_nicegui/3.17.1/static/quasar.important.prod.css") layer(quasar_importants);
+      
+      @import url("/_nicegui/3.17.1/static/nicegui.css") layer(nicegui);
+      @layer quasar {
+        blockquote, dd, dl, figure, h1, h2, h3, h4, h5, h6, hr, p, pre {
+          margin: revert-layer; /* HACK: revert Quasar's margin styles */
+        }
+        code, kbd, pre, samp {
+          font-family: revert-layer; /* HACK: revert Quasar's monospace font so Tailwind's mono font stack applies */
+        }
+        /* DEPRECATED: mirror of quasarframework/quasar#18413 + #18419, remove with the Quasar bump for NiceGUI 4.0 */
+        [dir="rtl"] .q-fab__actions--right {
+          transform-origin: 0 50%;
+          right: auto;
+          margin-right: 0;
+          left: 100%;
+          margin-left: 9px;
+          flex-direction: row-reverse;
+        }
+        [dir="rtl"] .q-fab__actions--right:not(.q-fab__actions--opened) {
+          transform: scale(0.4) translateX(-62px);
+        }
+        [dir="rtl"] .q-fab__actions--left {
+          transform-origin: 100% 50%;
+          left: auto;
+          margin-left: 0;
+          right: 100%;
+          margin-right: 9px;
+          flex-direction: row;
+        }
+        [dir="rtl"] .q-fab__actions--left:not(.q-fab__actions--opened) {
+          transform: scale(0.4) translateX(62px);
+        }
+        /* DEPRECATED: mirror of quasarframework/quasar#18468, remove with the Quasar bump for NiceGUI 4.0 */
+        .q-position-engine {
+          visibility: hidden;
+        }
+      }
+      @layer overrides {
+        .rotate-45, .rotate-90, .rotate-135, .rotate-180, .rotate-225, .rotate-270, .rotate-315 {
+  rotate: 0deg;
+}
+        .column.inline, .flex.inline, .row.inline {
+          display: inline-flex;  /* HACK: re-apply Quasar's inline styles to override Tailwind */
+        }
+        .nicegui-dialog-open,
+        .nicegui-select-popup-open,
+        .nicegui-table-fullscreen {
+          scroll-behavior: auto !important; /* HACK: avoid smooth-scrolling when dialogs or select popups close */
+        }
+      }
+    </style>
+    <script type="importmap">
+      {"imports": {"vue":"/_nicegui/3.17.1/static/vue.esm-browser.prod.js","sass":"/_nicegui/3.17.1/static/sass.default.js","immutable":"/_nicegui/3.17.1/static/immutable.es.js","dompurify":"/_nicegui/3.17.1/static/dompurify.mjs","nicegui-aggrid":"/_nicegui/3.17.1/esm/41d36080838384136940763c99275350/index.js","nicegui-aggrid/":"/_nicegui/3.17.1/esm/41d36080838384136940763c99275350/","nicegui-codemirror":"/_nicegui/3.17.1/esm/9af12f3b665d3a8764a5e036d9536f40/index.js","nicegui-codemirror/":"/_nicegui/3.17.1/esm/9af12f3b665d3a8764a5e036d9536f40/","nicegui-echart":"/_nicegui/3.17.1/esm/2884f3f6f9062691f353771a2fe5b66d/index.js","nicegui-echart/":"/_nicegui/3.17.1/esm/2884f3f6f9062691f353771a2fe5b66d/","nicegui-joystick":"/_nicegui/3.17.1/esm/31344492dbedefcd97dc616300524c2b/index.js","nicegui-joystick/":"/_nicegui/3.17.1/esm/31344492dbedefcd97dc616300524c2b/","nicegui-json-editor":"/_nicegui/3.17.1/esm/e33e4cc6c7be8988e9708dcf00c62ead/index.js","nicegui-json-editor/":"/_nicegui/3.17.1/esm/e33e4cc6c7be8988e9708dcf00c62ead/","nicegui-leaflet":"/_nicegui/3.17.1/esm/ca6fb67b1b94da3dabb508bf8dbe677c/index.js","nicegui-leaflet/":"/_nicegui/3.17.1/esm/ca6fb67b1b94da3dabb508bf8dbe677c/","nicegui-mermaid":"/_nicegui/3.17.1/esm/1afac892b02be5fdb8868c028dfd6607/index.js","nicegui-mermaid/":"/_nicegui/3.17.1/esm/1afac892b02be5fdb8868c028dfd6607/","nicegui-plotly":"/_nicegui/3.17.1/esm/1b3ba860b4c521f0f1f21a29b413fa47/index.js","nicegui-plotly/":"/_nicegui/3.17.1/esm/1b3ba860b4c521f0f1f21a29b413fa47/","nicegui-scene":"/_nicegui/3.17.1/esm/a2756e6f3fa46e2a786a91e10bb99450/index.js","nicegui-scene/":"/_nicegui/3.17.1/esm/a2756e6f3fa46e2a786a91e10bb99450/","nicegui-sortable":"/_nicegui/3.17.1/esm/ce22a931bc32d7ac8cdb5a49685432d1/index.js","nicegui-sortable/":"/_nicegui/3.17.1/esm/ce22a931bc32d7ac8cdb5a49685432d1/","nicegui-xterm":"/_nicegui/3.17.1/esm/f89bfde55eabd336aa4ce3a0839999be/index.js","nicegui-xterm/":"/_nicegui/3.17.1/esm/f89bfde55eabd336aa4ce3a0839999be/"}}
+    </script>
+    <script>
+      addStyle = (c) => document.head.append(Object.assign(document.createElement("style"), { textContent: c }));
+    </script>
+    
+    <!-- prevent Prettier from removing this line -->
+    
+    <link rel="modulepreload" href="http://127.0.0.1:8080/_nicegui/3.17.1/static/vue.esm-browser.prod.js">
+    
+    <link rel="modulepreload" href="http://127.0.0.1:8080/_nicegui/3.17.1/components/2f192583031d92ca8f6edbdd4fe23d01/header.js">
+    
+    <link rel="modulepreload" href="http://127.0.0.1:8080/_nicegui/3.17.1/components/e37ff340cfb8d818cc64b0273ba05d26/refreshable.js">
+    
+    <link rel="modulepreload" href="http://127.0.0.1:8080/_nicegui/3.17.1/components/20b4dcf981e309571a749401a9fa1832/table.js">
+    
+    <link rel="modulepreload" href="http://127.0.0.1:8080/_nicegui/3.17.1/components/eb8ec46e76734b0535eb0539e6861986/select.js">
+    
+    <link rel="modulepreload" href="http://127.0.0.1:8080/_nicegui/3.17.1/components/d7f459f58a40a94da9b00a151470c075/input.js">
+    
+    <!-- prevent Prettier from removing this line -->
+    
+    <style type="text/tailwindcss">
+      @custom-variant dark (&:where(body.body--dark, body.body--dark *));
+    </style>
+    
+    <!-- prevent Prettier from removing this line -->
+    
+  <style>/*! tailwindcss v4.1.13 | MIT License | https://tailwindcss.com */
+@layer properties;
+@layer theme, base, components, utilities;
+@layer theme {
+  :root, :host {
+    --font-sans: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
+    --color-white: #fff;
+    --spacing: 0.25rem;
+    --container-6xl: 72rem;
+    --font-weight-bold: 700;
+    --default-font-family: var(--font-sans);
+    --default-mono-font-family: var(--font-mono);
+  }
+}
+@layer base {
+  *, ::after, ::before, ::backdrop, ::file-selector-button {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid;
+  }
+  html, :host {
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    tab-size: 4;
+    font-family: var(--default-font-family, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji');
+    font-feature-settings: var(--default-font-feature-settings, normal);
+    font-variation-settings: var(--default-font-variation-settings, normal);
+    -webkit-tap-highlight-color: transparent;
+  }
+  hr {
+    height: 0;
+    color: inherit;
+    border-top-width: 1px;
+  }
+  abbr:where([title]) {
+    -webkit-text-decoration: underline dotted;
+    text-decoration: underline dotted;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+  a {
+    color: inherit;
+    -webkit-text-decoration: inherit;
+    text-decoration: inherit;
+  }
+  b, strong {
+    font-weight: bolder;
+  }
+  code, kbd, samp, pre {
+    font-family: var(--default-mono-font-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace);
+    font-feature-settings: var(--default-mono-font-feature-settings, normal);
+    font-variation-settings: var(--default-mono-font-variation-settings, normal);
+    font-size: 1em;
+  }
+  small {
+    font-size: 80%;
+  }
+  sub, sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+  }
+  sub {
+    bottom: -0.25em;
+  }
+  sup {
+    top: -0.5em;
+  }
+  table {
+    text-indent: 0;
+    border-color: inherit;
+    border-collapse: collapse;
+  }
+  :-moz-focusring {
+    outline: auto;
+  }
+  progress {
+    vertical-align: baseline;
+  }
+  summary {
+    display: list-item;
+  }
+  ol, ul, menu {
+    list-style: none;
+  }
+  img, svg, video, canvas, audio, iframe, embed, object {
+    display: block;
+    vertical-align: middle;
+  }
+  img, video {
+    max-width: 100%;
+    height: auto;
+  }
+  button, input, select, optgroup, textarea, ::file-selector-button {
+    font: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    border-radius: 0;
+    background-color: transparent;
+    opacity: 1;
+  }
+  :where(select:is([multiple], [size])) optgroup {
+    font-weight: bolder;
+  }
+  :where(select:is([multiple], [size])) optgroup option {
+    padding-inline-start: 20px;
+  }
+  ::file-selector-button {
+    margin-inline-end: 4px;
+  }
+  ::placeholder {
+    opacity: 1;
+  }
+  @supports (not (-webkit-appearance: -apple-pay-button))  or (contain-intrinsic-size: 1px) {
+    ::placeholder {
+      color: currentcolor;
+      @supports (color: color-mix(in lab, red, red)) {
+        color: color-mix(in oklab, currentcolor 50%, transparent);
+      }
+    }
+  }
+  textarea {
+    resize: vertical;
+  }
+  ::-webkit-search-decoration {
+    -webkit-appearance: none;
+  }
+  ::-webkit-date-and-time-value {
+    min-height: 1lh;
+    text-align: inherit;
+  }
+  ::-webkit-datetime-edit {
+    display: inline-flex;
+  }
+  ::-webkit-datetime-edit-fields-wrapper {
+    padding: 0;
+  }
+  ::-webkit-datetime-edit, ::-webkit-datetime-edit-year-field, ::-webkit-datetime-edit-month-field, ::-webkit-datetime-edit-day-field, ::-webkit-datetime-edit-hour-field, ::-webkit-datetime-edit-minute-field, ::-webkit-datetime-edit-second-field, ::-webkit-datetime-edit-millisecond-field, ::-webkit-datetime-edit-meridiem-field {
+    padding-block: 0;
+  }
+  ::-webkit-calendar-picker-indicator {
+    line-height: 1;
+  }
+  :-moz-ui-invalid {
+    box-shadow: none;
+  }
+  button, input:where([type='button'], [type='reset'], [type='submit']), ::file-selector-button {
+    appearance: button;
+  }
+  ::-webkit-inner-spin-button, ::-webkit-outer-spin-button {
+    height: auto;
+  }
+  [hidden]:where(:not([hidden='until-found'])) {
+    display: none !important;
+  }
+}
+@layer utilities {
+  .absolute {
+    position: absolute;
+  }
+  .fixed {
+    position: fixed;
+  }
+  .bottom-0 {
+    bottom: calc(var(--spacing) * 0);
+  }
+  .left-0 {
+    left: calc(var(--spacing) * 0);
+  }
+  .mx-auto {
+    margin-inline: auto;
+  }
+  .mt-4 {
+    margin-top: calc(var(--spacing) * 4);
+  }
+  .block {
+    display: block;
+  }
+  .hidden {
+    display: none;
+  }
+  .inline {
+    display: inline;
+  }
+  .w-32 {
+    width: calc(var(--spacing) * 32);
+  }
+  .w-56 {
+    width: calc(var(--spacing) * 56);
+  }
+  .w-full {
+    width: 100%;
+  }
+  .max-w-6xl {
+    max-width: var(--container-6xl);
+  }
+  .flex-1 {
+    flex: 1;
+  }
+  .cursor-pointer {
+    cursor: pointer;
+  }
+  .items-center {
+    align-items: center;
+  }
+  .items-end {
+    align-items: flex-end;
+  }
+  .items-start {
+    align-items: flex-start;
+  }
+  .justify-center {
+    justify-content: center;
+  }
+  .gap-2 {
+    gap: calc(var(--spacing) * 2);
+  }
+  .gap-4 {
+    gap: calc(var(--spacing) * 4);
+  }
+  .self-stretch {
+    align-self: stretch;
+  }
+  .bg-white {
+    background-color: var(--color-white);
+  }
+  .p-2 {
+    padding: calc(var(--spacing) * 2);
+  }
+  .p-4 {
+    padding: calc(var(--spacing) * 4);
+  }
+  .text-center {
+    text-align: center;
+  }
+  .text-right {
+    text-align: right;
+  }
+  .font-bold {
+    --tw-font-weight: var(--font-weight-bold);
+    font-weight: var(--font-weight-bold);
+  }
+  .text-white {
+    color: var(--color-white);
+  }
+}
+@property --tw-font-weight {
+  syntax: "*";
+  inherits: false;
+}
+@layer properties {
+  @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
+    *, ::before, ::after, ::backdrop {
+      --tw-font-weight: initial;
+    }
+  }
+}
+</style></head>
+  <body style="--q-primary: #5898d4; --q-secondary: #26a69a; --q-accent: #9c27b0; --q-dark: #1d1d1d; --q-dark-page: #121212; --q-positive: #21ba45; --q-negative: #c10015; --q-info: #31ccec; --q-warning: #f2c037;" class="desktop no-touch body--light">
+    <script defer="defer" src="04-goals_files/socket.io.min_-mMu.js"></script>
+    
+    <script defer="defer" src="04-goals_files/tailwindcss.min_-mMu.js"></script>
+    
+    <script type="module">
+      import * as Vue from "vue";
+      globalThis.Vue = Vue;
+      document.getElementById("esm-fallback")?.remove();
+    </script>
+    
+    <script defer="defer" src="04-goals_files/quasar.umd.prod_-mMu.js"></script>
+    
+    <script defer="defer" src="04-goals_files/nicegui_-mMu.js"></script>
+
+    <script defer="defer" src="04-goals_files/en-US.umd.prod_-mMu.js"></script>
+    <style></style>
+
+
+
+    <style>
+      #esm-fallback {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        height: 100vh;
+        font-family: sans-serif;
+        color: #888;
+        opacity: 0;
+        animation: esm-fallback-reveal 0s 1s forwards;
+      }
+      @keyframes esm-fallback-reveal {
+        to {
+          opacity: 1;
+        }
+      }
+      #esm-fallback ~ * {
+        display: none;
+      }
+    </style>
+    
+    <div id="app" data-v-app=""><div class="q-layout q-layout--standard nicegui-layout" style="min-height: 919px;" tabindex="-1" id="c0"><!----><!----><header class="q-header q-layout__section--marginal fixed-top nicegui-header wrap bg-blue-9" id="c4" loopback="true"><div id="c5" class="text-h6 font-bold">🏁 Цели → Оценка A–E</div><!----></header><div class="q-page-container" style="padding-top: 64px;" id="c1"><main class="q-page" style="min-height: 855px;" id="c2"><div id="c3" class="nicegui-content"><div id="c6" class="nicegui-column p-4 w-full max-w-6xl mx-auto gap-4"><div class="q-table__container q-table--horizontal-separator column no-wrap q-table__card q-table--no-wrap w-full" id="c8"><!----><div class="q-table__middle scroll"><table class="q-table"><thead><tr><th class="text-right">Сотрудник</th><th class="text-right">Цель</th><th class="text-right">Ц.</th><th class="text-right">% вып.</th><th class="text-right">Перевыполнил</th></tr></thead><tbody><tr class=""><td class="text-right">Иванов И.И.</td><td class="text-right">Система генерации учётных записей</td><td class="text-right">Ц3</td><td class="text-right">120</td><td class="text-right">true</td></tr><tr class=""><td class="text-right">Иванов И.И.</td><td class="text-right">Автоматизация стендов</td><td class="text-right">Ц2</td><td class="text-right">130</td><td class="text-right">true</td></tr><tr class=""><td class="text-right">Петров П.П.</td><td class="text-right">Снижение дефектов в проде</td><td class="text-right">Ц1</td><td class="text-right">100</td><td class="text-right">false</td></tr><tr class=""><td class="text-right">Сидоров С.С.</td><td class="text-right">Автоматизация регресса</td><td class="text-right">Ц2</td><td class="text-right">100</td><td class="text-right">false</td></tr><tr class=""><td class="text-right">Сидоров С.С.</td><td class="text-right">Документация 54-ФЗ</td><td class="text-right">Ц1</td><td class="text-right">100</td><td class="text-right">false</td></tr><tr class=""><td class="text-right">Смирнова А.А.</td><td class="text-right">Наставничество новичков</td><td class="text-right">Ц3</td><td class="text-right">60</td><td class="text-right">false</td></tr></tbody></table></div><!----></div><div id="c9" class="text-h6 mt-4">Добавить цель</div><div class="q-card nicegui-card w-full" id="c10"><div id="c11" class="nicegui-row row gap-4"><label class="q-field row no-wrap items-start q-field--standard q-select q-field--auto-height q-select--without-input q-select--without-chips q-select--single q-field--float q-field--labeled w-56" for="f_6318b074-3fae-49b9-8195-be0ae29cf4f9"><!----><div class="q-field__inner relative-position col self-stretch"><div class="q-field__control relative-position row no-wrap" tabindex="-1"><div class="q-field__control-container col relative-position row no-wrap q-anchor--skip"><div class="q-field__label no-pointer-events absolute ellipsis">Сотрудник</div><div class="q-field__native row items-center" id="c12" loopback="true"><span class="ellipsis">Иванов И.И.</span><input class="q-select__focus-target" id="f_6318b074-3fae-49b9-8195-be0ae29cf4f9" readonly="readonly" tabindex="0" role="combobox" aria-label="Сотрудник" aria-readonly="false" aria-autocomplete="none" aria-expanded="false" aria-controls="f_6318b074-3fae-49b9-8195-be0ae29cf4f9_lb" value="Иванов И.И."></div></div><div class="q-field__append q-field__marginal row no-wrap items-center q-anchor--skip"><i class="q-icon notranslate material-icons q-select__dropdown-icon" aria-hidden="true">arrow_drop_down</i></div><!----></div><!----></div><!----></label><label class="q-field row no-wrap items-start q-field--standard q-input q-field--labeled flex-1" for="c13"><!----><div class="q-field__inner relative-position col self-stretch"><div class="q-field__control relative-position row no-wrap" tabindex="-1"><div class="q-field__control-container col relative-position row no-wrap q-anchor--skip"><div class="q-field__label no-pointer-events absolute ellipsis">Цель</div><input class="q-field__native q-placeholder" tabindex="0" aria-label="Цель" name="c13" loopback="false" list="c13-datalist" id="c13" type="text"></div></div><!----></div><!----></label><!----><label class="q-field row no-wrap items-start q-field--standard q-select q-field--auto-height q-select--without-input q-select--without-chips q-select--single q-field--float q-field--labeled w-32" for="f_40aff649-47e1-4876-94e0-2cca217ca0cd"><!----><div class="q-field__inner relative-position col self-stretch"><div class="q-field__control relative-position row no-wrap" tabindex="-1"><div class="q-field__control-container col relative-position row no-wrap q-anchor--skip"><div class="q-field__label no-pointer-events absolute ellipsis">Привязка</div><div class="q-field__native row items-center" id="c14" loopback="true"><span class="ellipsis">Ц1</span><input class="q-select__focus-target" id="f_40aff649-47e1-4876-94e0-2cca217ca0cd" readonly="readonly" tabindex="0" role="combobox" aria-label="Привязка" aria-readonly="false" aria-autocomplete="none" aria-expanded="false" aria-controls="f_40aff649-47e1-4876-94e0-2cca217ca0cd_lb" value="Ц1"></div></div><div class="q-field__append q-field__marginal row no-wrap items-center q-anchor--skip"><i class="q-icon notranslate material-icons q-select__dropdown-icon" aria-hidden="true">arrow_drop_down</i></div><!----></div><!----></div><!----></label></div><div id="c15" class="nicegui-row row gap-4 items-center"><div class="q-slider q-slider--h q-slider--inactive inline no-wrap column q-slider--enabled q-slider--editable flex-1" role="slider" aria-valuemin="0" aria-valuemax="150" aria-orientation="horizontal" data-step="1" aria-valuenow="100" id="c16" loopback="true"><div class="q-slider__track-container q-slider__track-container--h" tabindex="0"><div class="q-slider__track relative-position no-outline" style="height: 4px;"><div class="q-slider__inner absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__selection absolute" style="left: 0%; width: 66.6667%;"></div><div class="q-slider__thumb q-slider__thumb--h q-slider__thumb--h-ltr absolute non-selectable" style="width: 20px; height: 20px; left: 66.6667%;"><svg class="q-slider__thumb-shape absolute-full" viewBox="0 0 20 20" aria-hidden="true"><path d="M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"></path></svg><div class="q-slider__focus-ring fit"></div></div></div></div></div><div class="q-checkbox cursor-pointer no-outline row inline no-wrap items-center" tabindex="0" role="checkbox" aria-checked="false" id="c17" loopback="true"><div class="q-checkbox__inner relative-position non-selectable q-checkbox__inner--falsy" aria-hidden="true"><input class="hidden q-checkbox__native absolute q-ma-none q-pa-none" type="checkbox"><div class="q-checkbox__bg absolute"><svg class="q-checkbox__svg fit absolute-full" viewBox="0 0 24 24"><path class="q-checkbox__truthy" fill="none" d="M1.73,12.91 8.1,19.28 22.79,4.59"></path><path class="q-checkbox__indet" d="M4,14H20V10H4"></path></svg></div></div><span class="no-outline" tabindex="-1"></span><div class="q-checkbox__label q-anchor--skip">Перевыполнил (инструмент автоматизации)</div></div></div><button class="q-btn q-btn-item non-selectable no-outline q-btn--standard q-btn--rectangle bg-primary text-white q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c18"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">➕ Добавить</span></span></button></div><div id="c19" class="text-h6 mt-4">Расчётная оценка</div><div class="q-table__container q-table--horizontal-separator column no-wrap q-table__card q-table--no-wrap w-full" id="c20"><!----><div class="q-table__middle scroll"><table class="q-table"><thead><tr><th class="text-right">Сотрудник</th><th class="text-right">% цели</th><th class="text-right">Оценка</th><th class="text-right">Смысл</th></tr></thead><tbody><tr class=""><td class="text-right">Иванов И.И.</td><td class="text-right">125</td><td class="text-right">A</td><td class="text-right">Отлично (перевыполнил, инструмент автоматизации)</td></tr><tr class=""><td class="text-right">Петров П.П.</td><td class="text-right">100</td><td class="text-right">B</td><td class="text-right">Хорошо (выполнил в срок)</td></tr><tr class=""><td class="text-right">Сидоров С.С.</td><td class="text-right">100</td><td class="text-right">B</td><td class="text-right">Хорошо (выполнил в срок)</td></tr><tr class=""><td class="text-right">Смирнова А.А.</td><td class="text-right">60</td><td class="text-right">C</td><td class="text-right">Удовлетворительно (частично)</td></tr></tbody></table></div><!----></div></div><div id="c21" class="nicegui-row row fixed bottom-0 left-0 w-full bg-white shadow-2 justify-center gap-2 p-2"><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c22"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">📊 Дашборд</span></span></button><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c23"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">👥 Команда</span></span></button><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c24"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">🎯 Оценки</span></span></button><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c25"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">🏁 Цели</span></span></button><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c26"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">💰 Премия</span></span></button><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c27"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">📥 Экспорт</span></span></button></div></div></main></div></div></div>
+    <div id="nicegui-keep-alive-cache" style="display: none" aria-hidden="true"></div>
+    <div id="popup" class="nicegui-error-popup" aria-hidden="true">
+      <span>Connection lost.</span>
+      <span>Trying to reconnect...</span>
+    </div>
+    <div id="too_long_message_popup" class="nicegui-error-popup" aria-hidden="true">
+      <span>Message too long</span>
+      <span>The message is too large for WebSocket transmission.</span>
+    </div>
+    <script type="module">
+      // Load DOMPurify for HTML sanitization
+      // NOTE: Always use DOMPurify instead of native setHTML because native setHTML strips class attributes.
+      import DOMPurify from "dompurify";
+      Element.prototype.setHTML = function (html) {
+        this.innerHTML = DOMPurify.sanitize(html);
+      };
+
+      const app = createApp(parseElements(String.raw`{"0":{"tag":"q-layout","class":["nicegui-layout"],"props":{"view":"hHh lpr fff"},"children":[4,1],"events":[{"listener_id":"5f2ba48d-0a57-4896-9fed-35919c4e6add","type":"sub_pages_open","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"df33616e-d555-4e94-8822-8b862fa5c7bf","type":"sub_pages_navigate","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"1":{"tag":"q-page-container","children":[2]},"2":{"tag":"q-page","children":[3]},"3":{"tag":"div","class":["nicegui-content"],"children":[6,21]},"4":{"tag":"nicegui-header","class":["nicegui-header","wrap","bg-blue-9"],"props":{"model-value":true,"loopback":true,"bordered":false,"elevated":false,"add-scroll-padding":true},"children":[5],"events":[{"listener_id":"8ec04612-5cd3-499b-9094-5f4c2bfd0650","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"5":{"tag":"div","text":"🏁 Цели → Оценка A–E","class":["text-h6","font-bold"]},"6":{"tag":"div","class":["nicegui-column","p-4","w-full","max-w-6xl","mx-auto","gap-4"],"children":[7,9,10,19,20]},"7":{"tag":"nicegui-refreshable","children":[8]},"8":{"tag":"nicegui-table","class":["w-full"],"props":{"filter":null,"columns":[{"name":"Сотрудник","label":"Сотрудник","field":"Сотрудник"},{"name":"Цель","label":"Цель","field":"Цель"},{"name":"Ц.","label":"Ц.","field":"Ц."},{"name":"% вып.","label":"% вып.","field":"% вып."},{"name":"Перевыполнил","label":"Перевыполнил","field":"Перевыполнил"}],"rows":[{"Сотрудник":"Иванов И.И.","Цель":"Система генерации учётных записей","Ц.":"Ц3","% вып.":120,"Перевыполнил":true},{"Сотрудник":"Иванов И.И.","Цель":"Автоматизация стендов","Ц.":"Ц2","% вып.":130,"Перевыполнил":true},{"Сотрудник":"Петров П.П.","Цель":"Снижение дефектов в проде","Ц.":"Ц1","% вып.":100,"Перевыполнил":false},{"Сотрудник":"Сидоров С.С.","Цель":"Автоматизация регресса","Ц.":"Ц2","% вып.":100,"Перевыполнил":false},{"Сотрудник":"Сидоров С.С.","Цель":"Документация 54-ФЗ","Ц.":"Ц1","% вып.":100,"Перевыполнил":false},{"Сотрудник":"Смирнова А.А.","Цель":"Наставничество новичков","Ц.":"Ц3","% вып.":60,"Перевыполнил":false}],"row-key":"id","hide-pagination":true,"pagination":{"rowsPerPage":0},"selection":"none","selected":[],"fullscreen":false},"events":[{"listener_id":"8a93ccf7-ab69-4050-a481-63e07f209a0c","type":"selection","specials":[],"modifiers":[],"keys":[],"args":[["added","rows","keys"]],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"e81bc228-8e05-4478-87b1-6603b93f692f","type":"update:pagination","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"12594a5c-a5b9-4789-8620-d52f8fa9f85c","type":"update:fullscreen","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"9":{"tag":"div","text":"Добавить цель","class":["text-h6","mt-4"]},"10":{"tag":"q-card","class":["nicegui-card","w-full"],"children":[11,15,18]},"11":{"tag":"div","class":["nicegui-row","row","gap-4"],"children":[12,13,14]},"12":{"tag":"nicegui-select","class":["w-56"],"props":{"model-value":{"value":0,"label":"Иванов И.И."},"loopback":true,"options":[{"value":0,"label":"Иванов И.И."},{"value":1,"label":"Петров П.П."},{"value":2,"label":"Сидоров С.С."},{"value":3,"label":"Смирнова А.А."}],"error":null,"label":"Сотрудник"},"events":[{"listener_id":"db5dd317-a4c1-4948-bac6-ea07ffd1d65a","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"e9bc9f16-2a0b-492f-acee-527dccca88e3","type":"popupShow","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"f0324496-d42d-46e5-8553-e9574cfb885d","type":"popupHide","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"13":{"tag":"nicegui-input","class":["flex-1"],"props":{"value":"","loopback":false,"error":null,"label":"Цель","for":"c13","type":"text","_autocomplete":[]},"events":[{"listener_id":"bad108b2-2954-46f5-b7a2-e2b8dec4fc19","type":"update:value","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"14":{"tag":"nicegui-select","class":["w-32"],"props":{"model-value":{"value":0,"label":"Ц1"},"loopback":true,"options":[{"value":0,"label":"Ц1"},{"value":1,"label":"Ц2"},{"value":2,"label":"Ц3"}],"error":null,"label":"Привязка"},"events":[{"listener_id":"88df65f5-e025-4580-adb1-4495d2cc9450","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"6c829f4c-52c8-4656-8d74-9442d2fdbd1a","type":"popupShow","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"6282dc96-b42b-452e-924d-b75fb5af08f9","type":"popupHide","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"15":{"tag":"div","class":["nicegui-row","row","gap-4","items-center"],"children":[16,17]},"16":{"tag":"q-slider","class":["flex-1"],"props":{"model-value":100,"loopback":true,"min":0,"max":150,"step":1.0},"events":[{"listener_id":"cbea2165-36b5-4419-b7d6-83758a00a6cc","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0.05,"leading_events":true,"trailing_events":true,"js_handler":null}]},"17":{"tag":"q-checkbox","text":"Перевыполнил (инструмент автоматизации)","props":{"model-value":false,"loopback":true},"events":[{"listener_id":"e0839574-6598-4759-ba8b-8573d88baa99","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"18":{"tag":"q-btn","props":{"color":"primary","label":"➕ Добавить"},"events":[{"listener_id":"752ec9e0-e420-4475-9831-982b7ebba1d7","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"19":{"tag":"div","text":"Расчётная оценка","class":["text-h6","mt-4"]},"20":{"tag":"nicegui-table","class":["w-full"],"props":{"filter":null,"columns":[{"name":"Сотрудник","label":"Сотрудник","field":"Сотрудник"},{"name":"% цели","label":"% цели","field":"% цели"},{"name":"Оценка","label":"Оценка","field":"Оценка"},{"name":"Смысл","label":"Смысл","field":"Смысл"}],"rows":[{"Сотрудник":"Иванов И.И.","% цели":125,"Оценка":"A","Смысл":"Отлично (перевыполнил, инструмент автоматизации)"},{"Сотрудник":"Петров П.П.","% цели":100,"Оценка":"B","Смысл":"Хорошо (выполнил в срок)"},{"Сотрудник":"Сидоров С.С.","% цели":100,"Оценка":"B","Смысл":"Хорошо (выполнил в срок)"},{"Сотрудник":"Смирнова А.А.","% цели":60,"Оценка":"C","Смысл":"Удовлетворительно (частично)"}],"row-key":"Сотрудник","hide-pagination":true,"pagination":{"rowsPerPage":0},"selection":"none","selected":[],"fullscreen":false},"events":[{"listener_id":"2a89b4cb-8961-4829-95e2-1da909f62011","type":"selection","specials":[],"modifiers":[],"keys":[],"args":[["added","rows","keys"]],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"263d06f1-7ff2-4ead-994f-d5a36668c2cb","type":"update:pagination","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"44c660da-8642-4bc7-a41f-c915d5ecba7e","type":"update:fullscreen","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"21":{"tag":"div","class":["nicegui-row","row","fixed","bottom-0","left-0","w-full","bg-white","shadow-2","justify-center","gap-2","p-2"],"children":[22,23,24,25,26,27]},"22":{"tag":"q-btn","props":{"color":"primary","label":"📊 Дашборд","flat":true},"events":[{"listener_id":"4f49789a-06f6-4589-bb7c-92786d4499e3","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"23":{"tag":"q-btn","props":{"color":"primary","label":"👥 Команда","flat":true},"events":[{"listener_id":"1a387bae-9fd3-437f-8f95-99bd6f1e4476","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"24":{"tag":"q-btn","props":{"color":"primary","label":"🎯 Оценки","flat":true},"events":[{"listener_id":"0e94cf3c-5571-494f-894e-554fc6eb764b","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"25":{"tag":"q-btn","props":{"color":"primary","label":"🏁 Цели","flat":true},"events":[{"listener_id":"416db916-7528-4089-85b8-9d8a31fc3d8d","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"26":{"tag":"q-btn","props":{"color":"primary","label":"💰 Премия","flat":true},"events":[{"listener_id":"721d021d-aba6-4ace-8201-41e7fbf20480","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"27":{"tag":"q-btn","props":{"color":"primary","label":"📥 Экспорт","flat":true},"events":[{"listener_id":"79536cba-c0a5-434d-aa65-6f94f7f15a8d","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]}}`), {
+        version: "3.17.1",
+        prefix: "",
+        query: {'client_id': 'b727cf06-97ea-47d9-841c-99a36751c924', 'next_message_id': 0, 'implicit_handshake': True},
+        extraHeaders: {},
+        transports: ['websocket', 'polling'],
+      });
+      const dark = False;
+      const language = "en-US";
+      const vue_config = {"brand":{"primary":"#5898d4","secondary":"#26a69a","accent":"#9c27b0","dark":"#1d1d1d","dark-page":"#121212","positive":"#21ba45","negative":"#c10015","info":"#31ccec","warning":"#f2c037"},"loadingBar":{"color":"primary","skipHijack":false},"lang":{"noHtmlAttrs":true}};
+      
+        app.use(Quasar, {config: vue_config});
+        applyColors(vue_config.brand);
+        Quasar.lang.set(Quasar.lang[language.replace('-', '')]);
+        darkSetter = (dark) => Quasar.Dark.set(dark === None ? "auto" : dark);
+        setDark(dark);
+    
+
+      import { default as header } from "/_nicegui/3.17.1/components/2f192583031d92ca8f6edbdd4fe23d01/header.js";
+app.component("nicegui-header", header);
+import { default as refreshable } from "/_nicegui/3.17.1/components/e37ff340cfb8d818cc64b0273ba05d26/refreshable.js";
+app.component("nicegui-refreshable", refreshable);
+import { default as table } from "/_nicegui/3.17.1/components/20b4dcf981e309571a749401a9fa1832/table.js";
+app.component("nicegui-table", table);
+import { default as select } from "/_nicegui/3.17.1/components/eb8ec46e76734b0535eb0539e6861986/select.js";
+app.component("nicegui-select", select);
+import { default as input } from "/_nicegui/3.17.1/components/d7f459f58a40a94da9b00a151470c075/input.js";
+app.component("nicegui-input", input);
+      
+
+      app.mount("#app");
+
+      // Scroll to fragment after Vue mounts (browser's native scroll may have failed if element wasn't ready)
+      if (window.location.hash) {
+        Vue.nextTick(() => {
+          const fragment = window.location.hash.substring(1);
+          (document.getElementById(fragment) || document.querySelector(`a[name="${fragment}"]`))?.scrollIntoView();
+        });
+      }
+    </script>
+  
+<div id="q-loading-bar" data-v-app=""><div class="q-loading-bar q-loading-bar--top bg-primary" style="transform: translate3d(-100%, -200%, 0px); height: 2px; opacity: 0;" aria-hidden="true"></div></div><div id="q-notify" data-v-app=""><div class="q-notifications"><div class="q-notifications__list q-notifications__list--top fixed column no-wrap items-start"></div><div class="q-notifications__list q-notifications__list--top fixed column no-wrap items-end"></div><div class="q-notifications__list q-notifications__list--bottom fixed column no-wrap items-start"></div><div class="q-notifications__list q-notifications__list--bottom fixed column no-wrap items-end"></div><div class="q-notifications__list q-notifications__list--top fixed column no-wrap items-center"></div><div class="q-notifications__list q-notifications__list--bottom fixed column no-wrap items-center"></div><div class="q-notifications__list q-notifications__list--center fixed column no-wrap items-start justify-center"></div><div class="q-notifications__list q-notifications__list--center fixed column no-wrap items-end justify-center"></div><div class="q-notifications__list q-notifications__list--center fixed column no-wrap flex-center"></div></div></div></body></html>

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html dir="ltr" style="scroll-padding-top: 64px;"><script src="06-export_files/prompt_lXfb.js"></script><script src="06-export_files/runScript_lXfb.js"></script><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>QA Grading System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta id="nicegui-color-scheme" name="color-scheme" content="light">
+    <link href="http://127.0.0.1:8080/_nicegui/3.17.1/static/favicon.ico" rel="shortcut icon">
+    <style>
+      @layer theme, base, quasar, nicegui, components, utilities, overrides, quasar_importants;
+      @import url("/_nicegui/3.17.1/static/fonts.css") layer(base);
+      
+        @import url("/_nicegui/3.17.1/static/quasar.unimportant.prod.css") layer(quasar);
+        @import url("/_nicegui/3.17.1/static/quasar.important.prod.css") layer(quasar_importants);
+      
+      @import url("/_nicegui/3.17.1/static/nicegui.css") layer(nicegui);
+      @layer quasar {
+        blockquote, dd, dl, figure, h1, h2, h3, h4, h5, h6, hr, p, pre {
+          margin: revert-layer; /* HACK: revert Quasar's margin styles */
+        }
+        code, kbd, pre, samp {
+          font-family: revert-layer; /* HACK: revert Quasar's monospace font so Tailwind's mono font stack applies */
+        }
+        /* DEPRECATED: mirror of quasarframework/quasar#18413 + #18419, remove with the Quasar bump for NiceGUI 4.0 */
+        [dir="rtl"] .q-fab__actions--right {
+          transform-origin: 0 50%;
+          right: auto;
+          margin-right: 0;
+          left: 100%;
+          margin-left: 9px;
+          flex-direction: row-reverse;
+        }
+        [dir="rtl"] .q-fab__actions--right:not(.q-fab__actions--opened) {
+          transform: scale(0.4) translateX(-62px);
+        }
+        [dir="rtl"] .q-fab__actions--left {
+          transform-origin: 100% 50%;
+          left: auto;
+          margin-left: 0;
+          right: 100%;
+          margin-right: 9px;
+          flex-direction: row;
+        }
+        [dir="rtl"] .q-fab__actions--left:not(.q-fab__actions--opened) {
+          transform: scale(0.4) translateX(62px);
+        }
+        /* DEPRECATED: mirror of quasarframework/quasar#18468, remove with the Quasar bump for NiceGUI 4.0 */
+        .q-position-engine {
+          visibility: hidden;
+        }
+      }
+      @layer overrides {
+        .rotate-45, .rotate-90, .rotate-135, .rotate-180, .rotate-225, .rotate-270, .rotate-315 {
+  rotate: 0deg;
+}
+        .column.inline, .flex.inline, .row.inline {
+          display: inline-flex;  /* HACK: re-apply Quasar's inline styles to override Tailwind */
+        }
+        .nicegui-dialog-open,
+        .nicegui-select-popup-open,
+        .nicegui-table-fullscreen {
+          scroll-behavior: auto !important; /* HACK: avoid smooth-scrolling when dialogs or select popups close */
+        }
+      }
+    </style>
+    <script type="importmap">
+      {"imports": {"vue":"/_nicegui/3.17.1/static/vue.esm-browser.prod.js","sass":"/_nicegui/3.17.1/static/sass.default.js","immutable":"/_nicegui/3.17.1/static/immutable.es.js","dompurify":"/_nicegui/3.17.1/static/dompurify.mjs","nicegui-aggrid":"/_nicegui/3.17.1/esm/41d36080838384136940763c99275350/index.js","nicegui-aggrid/":"/_nicegui/3.17.1/esm/41d36080838384136940763c99275350/","nicegui-codemirror":"/_nicegui/3.17.1/esm/9af12f3b665d3a8764a5e036d9536f40/index.js","nicegui-codemirror/":"/_nicegui/3.17.1/esm/9af12f3b665d3a8764a5e036d9536f40/","nicegui-echart":"/_nicegui/3.17.1/esm/2884f3f6f9062691f353771a2fe5b66d/index.js","nicegui-echart/":"/_nicegui/3.17.1/esm/2884f3f6f9062691f353771a2fe5b66d/","nicegui-joystick":"/_nicegui/3.17.1/esm/31344492dbedefcd97dc616300524c2b/index.js","nicegui-joystick/":"/_nicegui/3.17.1/esm/31344492dbedefcd97dc616300524c2b/","nicegui-json-editor":"/_nicegui/3.17.1/esm/e33e4cc6c7be8988e9708dcf00c62ead/index.js","nicegui-json-editor/":"/_nicegui/3.17.1/esm/e33e4cc6c7be8988e9708dcf00c62ead/","nicegui-leaflet":"/_nicegui/3.17.1/esm/ca6fb67b1b94da3dabb508bf8dbe677c/index.js","nicegui-leaflet/":"/_nicegui/3.17.1/esm/ca6fb67b1b94da3dabb508bf8dbe677c/","nicegui-mermaid":"/_nicegui/3.17.1/esm/1afac892b02be5fdb8868c028dfd6607/index.js","nicegui-mermaid/":"/_nicegui/3.17.1/esm/1afac892b02be5fdb8868c028dfd6607/","nicegui-plotly":"/_nicegui/3.17.1/esm/1b3ba860b4c521f0f1f21a29b413fa47/index.js","nicegui-plotly/":"/_nicegui/3.17.1/esm/1b3ba860b4c521f0f1f21a29b413fa47/","nicegui-scene":"/_nicegui/3.17.1/esm/a2756e6f3fa46e2a786a91e10bb99450/index.js","nicegui-scene/":"/_nicegui/3.17.1/esm/a2756e6f3fa46e2a786a91e10bb99450/","nicegui-sortable":"/_nicegui/3.17.1/esm/ce22a931bc32d7ac8cdb5a49685432d1/index.js","nicegui-sortable/":"/_nicegui/3.17.1/esm/ce22a931bc32d7ac8cdb5a49685432d1/","nicegui-xterm":"/_nicegui/3.17.1/esm/f89bfde55eabd336aa4ce3a0839999be/index.js","nicegui-xterm/":"/_nicegui/3.17.1/esm/f89bfde55eabd336aa4ce3a0839999be/"}}
+    </script>
+    <script>
+      addStyle = (c) => document.head.append(Object.assign(document.createElement("style"), { textContent: c }));
+    </script>
+    
+    <!-- prevent Prettier from removing this line -->
+    
+    <link rel="modulepreload" href="http://127.0.0.1:8080/_nicegui/3.17.1/static/vue.esm-browser.prod.js">
+    
+    <link rel="modulepreload" href="http://127.0.0.1:8080/_nicegui/3.17.1/components/2f192583031d92ca8f6edbdd4fe23d01/header.js">
+    
+    <!-- prevent Prettier from removing this line -->
+    
+    <style type="text/tailwindcss">
+      @custom-variant dark (&:where(body.body--dark, body.body--dark *));
+    </style>
+    
+    <!-- prevent Prettier from removing this line -->
+    
+  <style>/*! tailwindcss v4.1.13 | MIT License | https://tailwindcss.com */
+@layer properties;
+@layer theme, base, components, utilities;
+@layer theme {
+  :root, :host {
+    --font-sans: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
+    --color-white: #fff;
+    --spacing: 0.25rem;
+    --container-3xl: 48rem;
+    --font-weight-bold: 700;
+    --default-font-family: var(--font-sans);
+    --default-mono-font-family: var(--font-mono);
+  }
+}
+@layer base {
+  *, ::after, ::before, ::backdrop, ::file-selector-button {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid;
+  }
+  html, :host {
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    tab-size: 4;
+    font-family: var(--default-font-family, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji');
+    font-feature-settings: var(--default-font-feature-settings, normal);
+    font-variation-settings: var(--default-font-variation-settings, normal);
+    -webkit-tap-highlight-color: transparent;
+  }
+  hr {
+    height: 0;
+    color: inherit;
+    border-top-width: 1px;
+  }
+  abbr:where([title]) {
+    -webkit-text-decoration: underline dotted;
+    text-decoration: underline dotted;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+  a {
+    color: inherit;
+    -webkit-text-decoration: inherit;
+    text-decoration: inherit;
+  }
+  b, strong {
+    font-weight: bolder;
+  }
+  code, kbd, samp, pre {
+    font-family: var(--default-mono-font-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace);
+    font-feature-settings: var(--default-mono-font-feature-settings, normal);
+    font-variation-settings: var(--default-mono-font-variation-settings, normal);
+    font-size: 1em;
+  }
+  small {
+    font-size: 80%;
+  }
+  sub, sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+  }
+  sub {
+    bottom: -0.25em;
+  }
+  sup {
+    top: -0.5em;
+  }
+  table {
+    text-indent: 0;
+    border-color: inherit;
+    border-collapse: collapse;
+  }
+  :-moz-focusring {
+    outline: auto;
+  }
+  progress {
+    vertical-align: baseline;
+  }
+  summary {
+    display: list-item;
+  }
+  ol, ul, menu {
+    list-style: none;
+  }
+  img, svg, video, canvas, audio, iframe, embed, object {
+    display: block;
+    vertical-align: middle;
+  }
+  img, video {
+    max-width: 100%;
+    height: auto;
+  }
+  button, input, select, optgroup, textarea, ::file-selector-button {
+    font: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    border-radius: 0;
+    background-color: transparent;
+    opacity: 1;
+  }
+  :where(select:is([multiple], [size])) optgroup {
+    font-weight: bolder;
+  }
+  :where(select:is([multiple], [size])) optgroup option {
+    padding-inline-start: 20px;
+  }
+  ::file-selector-button {
+    margin-inline-end: 4px;
+  }
+  ::placeholder {
+    opacity: 1;
+  }
+  @supports (not (-webkit-appearance: -apple-pay-button))  or (contain-intrinsic-size: 1px) {
+    ::placeholder {
+      color: currentcolor;
+      @supports (color: color-mix(in lab, red, red)) {
+        color: color-mix(in oklab, currentcolor 50%, transparent);
+      }
+    }
+  }
+  textarea {
+    resize: vertical;
+  }
+  ::-webkit-search-decoration {
+    -webkit-appearance: none;
+  }
+  ::-webkit-date-and-time-value {
+    min-height: 1lh;
+    text-align: inherit;
+  }
+  ::-webkit-datetime-edit {
+    display: inline-flex;
+  }
+  ::-webkit-datetime-edit-fields-wrapper {
+    padding: 0;
+  }
+  ::-webkit-datetime-edit, ::-webkit-datetime-edit-year-field, ::-webkit-datetime-edit-month-field, ::-webkit-datetime-edit-day-field, ::-webkit-datetime-edit-hour-field, ::-webkit-datetime-edit-minute-field, ::-webkit-datetime-edit-second-field, ::-webkit-datetime-edit-millisecond-field, ::-webkit-datetime-edit-meridiem-field {
+    padding-block: 0;
+  }
+  ::-webkit-calendar-picker-indicator {
+    line-height: 1;
+  }
+  :-moz-ui-invalid {
+    box-shadow: none;
+  }
+  button, input:where([type='button'], [type='reset'], [type='submit']), ::file-selector-button {
+    appearance: button;
+  }
+  ::-webkit-inner-spin-button, ::-webkit-outer-spin-button {
+    height: auto;
+  }
+  [hidden]:where(:not([hidden='until-found'])) {
+    display: none !important;
+  }
+}
+@layer utilities {
+  .fixed {
+    position: fixed;
+  }
+  .bottom-0 {
+    bottom: calc(var(--spacing) * 0);
+  }
+  .left-0 {
+    left: calc(var(--spacing) * 0);
+  }
+  .mx-auto {
+    margin-inline: auto;
+  }
+  .block {
+    display: block;
+  }
+  .w-full {
+    width: 100%;
+  }
+  .max-w-3xl {
+    max-width: var(--container-3xl);
+  }
+  .items-center {
+    align-items: center;
+  }
+  .items-end {
+    align-items: flex-end;
+  }
+  .items-start {
+    align-items: flex-start;
+  }
+  .justify-center {
+    justify-content: center;
+  }
+  .gap-2 {
+    gap: calc(var(--spacing) * 2);
+  }
+  .gap-4 {
+    gap: calc(var(--spacing) * 4);
+  }
+  .bg-white {
+    background-color: var(--color-white);
+  }
+  .p-2 {
+    padding: calc(var(--spacing) * 2);
+  }
+  .p-4 {
+    padding: calc(var(--spacing) * 4);
+  }
+  .text-center {
+    text-align: center;
+  }
+  .font-bold {
+    --tw-font-weight: var(--font-weight-bold);
+    font-weight: var(--font-weight-bold);
+  }
+  .text-white {
+    color: var(--color-white);
+  }
+}
+@property --tw-font-weight {
+  syntax: "*";
+  inherits: false;
+}
+@layer properties {
+  @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
+    *, ::before, ::after, ::backdrop {
+      --tw-font-weight: initial;
+    }
+  }
+}
+</style></head>
+  <body style="--q-primary: #5898d4; --q-secondary: #26a69a; --q-accent: #9c27b0; --q-dark: #1d1d1d; --q-dark-page: #121212; --q-positive: #21ba45; --q-negative: #c10015; --q-info: #31ccec; --q-warning: #f2c037;" class="desktop no-touch body--light">
+    <script defer="defer" src="06-export_files/socket.io.min_lXfb.js"></script>
+    
+    <script defer="defer" src="06-export_files/tailwindcss.min_lXfb.js"></script>
+    
+    <script type="module">
+      import * as Vue from "vue";
+      globalThis.Vue = Vue;
+      document.getElementById("esm-fallback")?.remove();
+    </script>
+    
+    <script defer="defer" src="06-export_files/quasar.umd.prod_lXfb.js"></script>
+    
+    <script defer="defer" src="06-export_files/nicegui_lXfb.js"></script>
+
+    <script defer="defer" src="06-export_files/en-US.umd.prod_lXfb.js"></script>
+    <style></style>
+
+
+
+    <style>
+      #esm-fallback {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        height: 100vh;
+        font-family: sans-serif;
+        color: #888;
+        opacity: 0;
+        animation: esm-fallback-reveal 0s 1s forwards;
+      }
+      @keyframes esm-fallback-reveal {
+        to {
+          opacity: 1;
+        }
+      }
+      #esm-fallback ~ * {
+        display: none;
+      }
+    </style>
+    
+    <div id="app" data-v-app=""><div class="q-layout q-layout--standard nicegui-layout" style="min-height: 919px;" tabindex="-1" id="c0"><!----><!----><header class="q-header q-layout__section--marginal fixed-top nicegui-header wrap bg-blue-9" id="c4" loopback="true"><div id="c5" class="text-h6 font-bold">📥 Экспорт в Excel</div><!----></header><div class="q-page-container" style="padding-top: 64px;" id="c1"><main class="q-page" style="min-height: 855px;" id="c2"><div id="c3" class="nicegui-content"><div id="c6" class="nicegui-column p-4 w-full max-w-3xl mx-auto gap-4"><div id="c7" class="text-caption text-grey-7">Выгружает текущее состояние (Дашборд, Компетенции, Оценки, Грейды).</div><div id="c8"></div><button class="q-btn q-btn-item non-selectable no-outline q-btn--standard q-btn--rectangle bg-primary text-white q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c9"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">📥 Сформировать QA_System.xlsx</span></span></button><div id="c10" class="text-caption text-grey-7">Файл появится в папке проекта рядом с app.py</div></div><div id="c11" class="nicegui-row row fixed bottom-0 left-0 w-full bg-white shadow-2 justify-center gap-2 p-2"><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c12"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">📊 Дашборд</span></span></button><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c13"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">👥 Команда</span></span></button><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c14"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">🎯 Оценки</span></span></button><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c15"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">🏁 Цели</span></span></button><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c16"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">💰 Премия</span></span></button><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c17"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">📥 Экспорт</span></span></button></div></div></main></div></div></div>
+    <div id="nicegui-keep-alive-cache" style="display: none" aria-hidden="true"></div>
+    <div id="popup" class="nicegui-error-popup" aria-hidden="true">
+      <span>Connection lost.</span>
+      <span>Trying to reconnect...</span>
+    </div>
+    <div id="too_long_message_popup" class="nicegui-error-popup" aria-hidden="true">
+      <span>Message too long</span>
+      <span>The message is too large for WebSocket transmission.</span>
+    </div>
+    <script type="module">
+      // Load DOMPurify for HTML sanitization
+      // NOTE: Always use DOMPurify instead of native setHTML because native setHTML strips class attributes.
+      import DOMPurify from "dompurify";
+      Element.prototype.setHTML = function (html) {
+        this.innerHTML = DOMPurify.sanitize(html);
+      };
+
+      const app = createApp(parseElements(String.raw`{"0":{"tag":"q-layout","class":["nicegui-layout"],"props":{"view":"hHh lpr fff"},"children":[4,1],"events":[{"listener_id":"a3235925-4b35-4c1a-a499-38e6c7bb70e7","type":"sub_pages_open","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"8e39a3b7-2907-4ee3-836b-768545db0b08","type":"sub_pages_navigate","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"1":{"tag":"q-page-container","children":[2]},"2":{"tag":"q-page","children":[3]},"3":{"tag":"div","class":["nicegui-content"],"children":[6,11]},"4":{"tag":"nicegui-header","class":["nicegui-header","wrap","bg-blue-9"],"props":{"model-value":true,"loopback":true,"bordered":false,"elevated":false,"add-scroll-padding":true},"children":[5],"events":[{"listener_id":"b5280e52-cd31-4b61-b7f0-b2cc64b81b18","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"5":{"tag":"div","text":"📥 Экспорт в Excel","class":["text-h6","font-bold"]},"6":{"tag":"div","class":["nicegui-column","p-4","w-full","max-w-3xl","mx-auto","gap-4"],"children":[7,8,9,10]},"7":{"tag":"div","text":"Выгружает текущее состояние (Дашборд, Компетенции, Оценки, Грейды).","class":["text-caption","text-grey-7"]},"8":{"tag":"div","text":""},"9":{"tag":"q-btn","props":{"color":"primary","label":"📥 Сформировать QA_System.xlsx"},"events":[{"listener_id":"62a2d93a-a161-4c63-84f4-c59a0d5fcf95","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"10":{"tag":"div","text":"Файл появится в папке проекта рядом с app.py","class":["text-caption","text-grey-7"]},"11":{"tag":"div","class":["nicegui-row","row","fixed","bottom-0","left-0","w-full","bg-white","shadow-2","justify-center","gap-2","p-2"],"children":[12,13,14,15,16,17]},"12":{"tag":"q-btn","props":{"color":"primary","label":"📊 Дашборд","flat":true},"events":[{"listener_id":"523e5c89-b91f-4e86-9a91-357d4073bbb5","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"13":{"tag":"q-btn","props":{"color":"primary","label":"👥 Команда","flat":true},"events":[{"listener_id":"680adb36-36c7-43eb-80e1-0df9381e9f18","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"14":{"tag":"q-btn","props":{"color":"primary","label":"🎯 Оценки","flat":true},"events":[{"listener_id":"a2d20248-b7d9-4b91-9557-708a860b615f","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"15":{"tag":"q-btn","props":{"color":"primary","label":"🏁 Цели","flat":true},"events":[{"listener_id":"90dead20-7692-4dad-8fdf-07e9eed369e2","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"16":{"tag":"q-btn","props":{"color":"primary","label":"💰 Премия","flat":true},"events":[{"listener_id":"4b89ba7b-b459-4865-84a0-02124061fdb0","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"17":{"tag":"q-btn","props":{"color":"primary","label":"📥 Экспорт","flat":true},"events":[{"listener_id":"6d7dca52-e212-4047-8c29-7a9259099845","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]}}`), {
+        version: "3.17.1",
+        prefix: "",
+        query: {'client_id': 'cf436617-66ad-4214-b9b7-cf03351d13d7', 'next_message_id': 0, 'implicit_handshake': True},
+        extraHeaders: {},
+        transports: ['websocket', 'polling'],
+      });
+      const dark = False;
+      const language = "en-US";
+      const vue_config = {"brand":{"primary":"#5898d4","secondary":"#26a69a","accent":"#9c27b0","dark":"#1d1d1d","dark-page":"#121212","positive":"#21ba45","negative":"#c10015","info":"#31ccec","warning":"#f2c037"},"loadingBar":{"color":"primary","skipHijack":false},"lang":{"noHtmlAttrs":true}};
+      
+        app.use(Quasar, {config: vue_config});
+        applyColors(vue_config.brand);
+        Quasar.lang.set(Quasar.lang[language.replace('-', '')]);
+        darkSetter = (dark) => Quasar.Dark.set(dark === None ? "auto" : dark);
+        setDark(dark);
+    
+
+      import { default as header } from "/_nicegui/3.17.1/components/2f192583031d92ca8f6edbdd4fe23d01/header.js";
+app.component("nicegui-header", header);
+      
+
+      app.mount("#app");
+
+      // Scroll to fragment after Vue mounts (browser's native scroll may have failed if element wasn't ready)
+      if (window.location.hash) {
+        Vue.nextTick(() => {
+          const fragment = window.location.hash.substring(1);
+          (document.getElementById(fragment) || document.querySelector(`a[name="${fragment}"]`))?.scrollIntoView();
+        });
+      }
+    </script>
+  
+<div id="q-loading-bar" data-v-app=""><div class="q-loading-bar q-loading-bar--top bg-primary" style="transform: translate3d(-100%, -200%, 0px); height: 2px; opacity: 0;" aria-hidden="true"></div></div><div id="q-notify" data-v-app=""><div class="q-notifications"><div class="q-notifications__list q-notifications__list--top fixed column no-wrap items-start"></div><div class="q-notifications__list q-notifications__list--top fixed column no-wrap items-end"></div><div class="q-notifications__list q-notifications__list--bottom fixed column no-wrap items-start"></div><div class="q-notifications__list q-notifications__list--bottom fixed column no-wrap items-end"></div><div class="q-notifications__list q-notifications__list--top fixed column no-wrap items-center"></div><div class="q-notifications__list q-notifications__list--bottom fixed column no-wrap items-center"></div><div class="q-notifications__list q-notifications__list--center fixed column no-wrap items-start justify-center"></div><div class="q-notifications__list q-notifications__list--center fixed column no-wrap items-end justify-center"></div><div class="q-notifications__list q-notifications__list--center fixed column no-wrap flex-center"></div></div></div></body></html>

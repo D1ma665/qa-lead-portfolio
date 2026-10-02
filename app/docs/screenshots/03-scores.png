@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html dir="ltr" style="scroll-padding-top: 64px;"><script src="03-scores_files/prompt_vPST.js"></script><script src="03-scores_files/runScript_vPST.js"></script><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>QA Grading System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta id="nicegui-color-scheme" name="color-scheme" content="light">
+    <link href="http://127.0.0.1:8080/_nicegui/3.17.1/static/favicon.ico" rel="shortcut icon">
+    <style>
+      @layer theme, base, quasar, nicegui, components, utilities, overrides, quasar_importants;
+      @import url("/_nicegui/3.17.1/static/fonts.css") layer(base);
+      
+        @import url("/_nicegui/3.17.1/static/quasar.unimportant.prod.css") layer(quasar);
+        @import url("/_nicegui/3.17.1/static/quasar.important.prod.css") layer(quasar_importants);
+      
+      @import url("/_nicegui/3.17.1/static/nicegui.css") layer(nicegui);
+      @layer quasar {
+        blockquote, dd, dl, figure, h1, h2, h3, h4, h5, h6, hr, p, pre {
+          margin: revert-layer; /* HACK: revert Quasar's margin styles */
+        }
+        code, kbd, pre, samp {
+          font-family: revert-layer; /* HACK: revert Quasar's monospace font so Tailwind's mono font stack applies */
+        }
+        /* DEPRECATED: mirror of quasarframework/quasar#18413 + #18419, remove with the Quasar bump for NiceGUI 4.0 */
+        [dir="rtl"] .q-fab__actions--right {
+          transform-origin: 0 50%;
+          right: auto;
+          margin-right: 0;
+          left: 100%;
+          margin-left: 9px;
+          flex-direction: row-reverse;
+        }
+        [dir="rtl"] .q-fab__actions--right:not(.q-fab__actions--opened) {
+          transform: scale(0.4) translateX(-62px);
+        }
+        [dir="rtl"] .q-fab__actions--left {
+          transform-origin: 100% 50%;
+          left: auto;
+          margin-left: 0;
+          right: 100%;
+          margin-right: 9px;
+          flex-direction: row;
+        }
+        [dir="rtl"] .q-fab__actions--left:not(.q-fab__actions--opened) {
+          transform: scale(0.4) translateX(62px);
+        }
+        /* DEPRECATED: mirror of quasarframework/quasar#18468, remove with the Quasar bump for NiceGUI 4.0 */
+        .q-position-engine {
+          visibility: hidden;
+        }
+      }
+      @layer overrides {
+        .rotate-45, .rotate-90, .rotate-135, .rotate-180, .rotate-225, .rotate-270, .rotate-315 {
+  rotate: 0deg;
+}
+        .column.inline, .flex.inline, .row.inline {
+          display: inline-flex;  /* HACK: re-apply Quasar's inline styles to override Tailwind */
+        }
+        .nicegui-dialog-open,
+        .nicegui-select-popup-open,
+        .nicegui-table-fullscreen {
+          scroll-behavior: auto !important; /* HACK: avoid smooth-scrolling when dialogs or select popups close */
+        }
+      }
+    </style>
+    <script type="importmap">
+      {"imports": {"vue":"/_nicegui/3.17.1/static/vue.esm-browser.prod.js","sass":"/_nicegui/3.17.1/static/sass.default.js","immutable":"/_nicegui/3.17.1/static/immutable.es.js","dompurify":"/_nicegui/3.17.1/static/dompurify.mjs","nicegui-aggrid":"/_nicegui/3.17.1/esm/41d36080838384136940763c99275350/index.js","nicegui-aggrid/":"/_nicegui/3.17.1/esm/41d36080838384136940763c99275350/","nicegui-codemirror":"/_nicegui/3.17.1/esm/9af12f3b665d3a8764a5e036d9536f40/index.js","nicegui-codemirror/":"/_nicegui/3.17.1/esm/9af12f3b665d3a8764a5e036d9536f40/","nicegui-echart":"/_nicegui/3.17.1/esm/2884f3f6f9062691f353771a2fe5b66d/index.js","nicegui-echart/":"/_nicegui/3.17.1/esm/2884f3f6f9062691f353771a2fe5b66d/","nicegui-joystick":"/_nicegui/3.17.1/esm/31344492dbedefcd97dc616300524c2b/index.js","nicegui-joystick/":"/_nicegui/3.17.1/esm/31344492dbedefcd97dc616300524c2b/","nicegui-json-editor":"/_nicegui/3.17.1/esm/e33e4cc6c7be8988e9708dcf00c62ead/index.js","nicegui-json-editor/":"/_nicegui/3.17.1/esm/e33e4cc6c7be8988e9708dcf00c62ead/","nicegui-leaflet":"/_nicegui/3.17.1/esm/ca6fb67b1b94da3dabb508bf8dbe677c/index.js","nicegui-leaflet/":"/_nicegui/3.17.1/esm/ca6fb67b1b94da3dabb508bf8dbe677c/","nicegui-mermaid":"/_nicegui/3.17.1/esm/1afac892b02be5fdb8868c028dfd6607/index.js","nicegui-mermaid/":"/_nicegui/3.17.1/esm/1afac892b02be5fdb8868c028dfd6607/","nicegui-plotly":"/_nicegui/3.17.1/esm/1b3ba860b4c521f0f1f21a29b413fa47/index.js","nicegui-plotly/":"/_nicegui/3.17.1/esm/1b3ba860b4c521f0f1f21a29b413fa47/","nicegui-scene":"/_nicegui/3.17.1/esm/a2756e6f3fa46e2a786a91e10bb99450/index.js","nicegui-scene/":"/_nicegui/3.17.1/esm/a2756e6f3fa46e2a786a91e10bb99450/","nicegui-sortable":"/_nicegui/3.17.1/esm/ce22a931bc32d7ac8cdb5a49685432d1/index.js","nicegui-sortable/":"/_nicegui/3.17.1/esm/ce22a931bc32d7ac8cdb5a49685432d1/","nicegui-xterm":"/_nicegui/3.17.1/esm/f89bfde55eabd336aa4ce3a0839999be/index.js","nicegui-xterm/":"/_nicegui/3.17.1/esm/f89bfde55eabd336aa4ce3a0839999be/"}}
+    </script>
+    <script>
+      addStyle = (c) => document.head.append(Object.assign(document.createElement("style"), { textContent: c }));
+    </script>
+    
+    <!-- prevent Prettier from removing this line -->
+    
+    <link rel="modulepreload" href="http://127.0.0.1:8080/_nicegui/3.17.1/static/vue.esm-browser.prod.js">
+    
+    <link rel="modulepreload" href="http://127.0.0.1:8080/_nicegui/3.17.1/components/2f192583031d92ca8f6edbdd4fe23d01/header.js">
+    
+    <link rel="modulepreload" href="http://127.0.0.1:8080/_nicegui/3.17.1/components/eb8ec46e76734b0535eb0539e6861986/select.js">
+    
+    <link rel="modulepreload" href="http://127.0.0.1:8080/_nicegui/3.17.1/components/e37ff340cfb8d818cc64b0273ba05d26/refreshable.js">
+    
+    <link rel="modulepreload" href="http://127.0.0.1:8080/_nicegui/3.17.1/components/20b4dcf981e309571a749401a9fa1832/table.js">
+    
+    <!-- prevent Prettier from removing this line -->
+    
+    <style type="text/tailwindcss">
+      @custom-variant dark (&:where(body.body--dark, body.body--dark *));
+    </style>
+    
+    <!-- prevent Prettier from removing this line -->
+    
+  <style>/*! tailwindcss v4.1.13 | MIT License | https://tailwindcss.com */
+@layer properties;
+@layer theme, base, components, utilities;
+@layer theme {
+  :root, :host {
+    --font-sans: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
+    --color-white: #fff;
+    --spacing: 0.25rem;
+    --container-6xl: 72rem;
+    --text-sm: 0.875rem;
+    --text-sm--line-height: calc(1.25 / 0.875);
+    --font-weight-bold: 700;
+    --default-font-family: var(--font-sans);
+    --default-mono-font-family: var(--font-mono);
+  }
+}
+@layer base {
+  *, ::after, ::before, ::backdrop, ::file-selector-button {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid;
+  }
+  html, :host {
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    tab-size: 4;
+    font-family: var(--default-font-family, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji');
+    font-feature-settings: var(--default-font-feature-settings, normal);
+    font-variation-settings: var(--default-font-variation-settings, normal);
+    -webkit-tap-highlight-color: transparent;
+  }
+  hr {
+    height: 0;
+    color: inherit;
+    border-top-width: 1px;
+  }
+  abbr:where([title]) {
+    -webkit-text-decoration: underline dotted;
+    text-decoration: underline dotted;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+  a {
+    color: inherit;
+    -webkit-text-decoration: inherit;
+    text-decoration: inherit;
+  }
+  b, strong {
+    font-weight: bolder;
+  }
+  code, kbd, samp, pre {
+    font-family: var(--default-mono-font-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace);
+    font-feature-settings: var(--default-mono-font-feature-settings, normal);
+    font-variation-settings: var(--default-mono-font-variation-settings, normal);
+    font-size: 1em;
+  }
+  small {
+    font-size: 80%;
+  }
+  sub, sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+  }
+  sub {
+    bottom: -0.25em;
+  }
+  sup {
+    top: -0.5em;
+  }
+  table {
+    text-indent: 0;
+    border-color: inherit;
+    border-collapse: collapse;
+  }
+  :-moz-focusring {
+    outline: auto;
+  }
+  progress {
+    vertical-align: baseline;
+  }
+  summary {
+    display: list-item;
+  }
+  ol, ul, menu {
+    list-style: none;
+  }
+  img, svg, video, canvas, audio, iframe, embed, object {
+    display: block;
+    vertical-align: middle;
+  }
+  img, video {
+    max-width: 100%;
+    height: auto;
+  }
+  button, input, select, optgroup, textarea, ::file-selector-button {
+    font: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    border-radius: 0;
+    background-color: transparent;
+    opacity: 1;
+  }
+  :where(select:is([multiple], [size])) optgroup {
+    font-weight: bolder;
+  }
+  :where(select:is([multiple], [size])) optgroup option {
+    padding-inline-start: 20px;
+  }
+  ::file-selector-button {
+    margin-inline-end: 4px;
+  }
+  ::placeholder {
+    opacity: 1;
+  }
+  @supports (not (-webkit-appearance: -apple-pay-button))  or (contain-intrinsic-size: 1px) {
+    ::placeholder {
+      color: currentcolor;
+      @supports (color: color-mix(in lab, red, red)) {
+        color: color-mix(in oklab, currentcolor 50%, transparent);
+      }
+    }
+  }
+  textarea {
+    resize: vertical;
+  }
+  ::-webkit-search-decoration {
+    -webkit-appearance: none;
+  }
+  ::-webkit-date-and-time-value {
+    min-height: 1lh;
+    text-align: inherit;
+  }
+  ::-webkit-datetime-edit {
+    display: inline-flex;
+  }
+  ::-webkit-datetime-edit-fields-wrapper {
+    padding: 0;
+  }
+  ::-webkit-datetime-edit, ::-webkit-datetime-edit-year-field, ::-webkit-datetime-edit-month-field, ::-webkit-datetime-edit-day-field, ::-webkit-datetime-edit-hour-field, ::-webkit-datetime-edit-minute-field, ::-webkit-datetime-edit-second-field, ::-webkit-datetime-edit-millisecond-field, ::-webkit-datetime-edit-meridiem-field {
+    padding-block: 0;
+  }
+  ::-webkit-calendar-picker-indicator {
+    line-height: 1;
+  }
+  :-moz-ui-invalid {
+    box-shadow: none;
+  }
+  button, input:where([type='button'], [type='reset'], [type='submit']), ::file-selector-button {
+    appearance: button;
+  }
+  ::-webkit-inner-spin-button, ::-webkit-outer-spin-button {
+    height: auto;
+  }
+  [hidden]:where(:not([hidden='until-found'])) {
+    display: none !important;
+  }
+}
+@layer utilities {
+  .absolute {
+    position: absolute;
+  }
+  .fixed {
+    position: fixed;
+  }
+  .bottom-0 {
+    bottom: calc(var(--spacing) * 0);
+  }
+  .left-0 {
+    left: calc(var(--spacing) * 0);
+  }
+  .mx-auto {
+    margin-inline: auto;
+  }
+  .mt-4 {
+    margin-top: calc(var(--spacing) * 4);
+  }
+  .block {
+    display: block;
+  }
+  .inline {
+    display: inline;
+  }
+  .w-64 {
+    width: calc(var(--spacing) * 64);
+  }
+  .w-96 {
+    width: calc(var(--spacing) * 96);
+  }
+  .w-full {
+    width: 100%;
+  }
+  .max-w-6xl {
+    max-width: var(--container-6xl);
+  }
+  .flex-1 {
+    flex: 1;
+  }
+  .items-center {
+    align-items: center;
+  }
+  .items-end {
+    align-items: flex-end;
+  }
+  .items-start {
+    align-items: flex-start;
+  }
+  .justify-center {
+    justify-content: center;
+  }
+  .gap-2 {
+    gap: calc(var(--spacing) * 2);
+  }
+  .gap-4 {
+    gap: calc(var(--spacing) * 4);
+  }
+  .self-stretch {
+    align-self: stretch;
+  }
+  .bg-white {
+    background-color: var(--color-white);
+  }
+  .p-2 {
+    padding: calc(var(--spacing) * 2);
+  }
+  .p-4 {
+    padding: calc(var(--spacing) * 4);
+  }
+  .text-center {
+    text-align: center;
+  }
+  .text-right {
+    text-align: right;
+  }
+  .text-sm {
+    font-size: var(--text-sm);
+    line-height: var(--tw-leading, var(--text-sm--line-height));
+  }
+  .font-bold {
+    --tw-font-weight: var(--font-weight-bold);
+    font-weight: var(--font-weight-bold);
+  }
+  .text-white {
+    color: var(--color-white);
+  }
+}
+@property --tw-font-weight {
+  syntax: "*";
+  inherits: false;
+}
+@layer properties {
+  @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
+    *, ::before, ::after, ::backdrop {
+      --tw-font-weight: initial;
+    }
+  }
+}
+</style></head>
+  <body style="--q-primary: #5898d4; --q-secondary: #26a69a; --q-accent: #9c27b0; --q-dark: #1d1d1d; --q-dark-page: #121212; --q-positive: #21ba45; --q-negative: #c10015; --q-info: #31ccec; --q-warning: #f2c037;" class="desktop no-touch body--light">
+    <script defer="defer" src="03-scores_files/socket.io.min_vPST.js"></script>
+    
+    <script defer="defer" src="03-scores_files/tailwindcss.min_vPST.js"></script>
+    
+    <script type="module">
+      import * as Vue from "vue";
+      globalThis.Vue = Vue;
+      document.getElementById("esm-fallback")?.remove();
+    </script>
+    
+    <script defer="defer" src="03-scores_files/quasar.umd.prod_vPST.js"></script>
+    
+    <script defer="defer" src="03-scores_files/nicegui_vPST.js"></script>
+
+    <script defer="defer" src="03-scores_files/en-US.umd.prod_vPST.js"></script>
+    <style></style>
+
+
+
+    <style>
+      #esm-fallback {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        height: 100vh;
+        font-family: sans-serif;
+        color: #888;
+        opacity: 0;
+        animation: esm-fallback-reveal 0s 1s forwards;
+      }
+      @keyframes esm-fallback-reveal {
+        to {
+          opacity: 1;
+        }
+      }
+      #esm-fallback ~ * {
+        display: none;
+      }
+    </style>
+    
+    <div id="app" data-v-app=""><div class="q-layout q-layout--standard nicegui-layout" style="min-height: 919px;" tabindex="-1" id="c0"><!----><!----><header class="q-header q-layout__section--marginal fixed-top nicegui-header wrap bg-blue-9" id="c4" loopback="true"><div id="c5" class="text-h6 font-bold">🎯 Оценки компетенций</div><!----></header><div class="q-page-container" style="padding-top: 64px;" id="c1"><main class="q-page" style="min-height: 855px;" id="c2"><div id="c3" class="nicegui-content"><div id="c6" class="nicegui-column p-4 w-full max-w-6xl mx-auto gap-4"><div id="c7" class="text-caption text-grey-7">Балл 1–5 по каждой компетенции. Кнопка сохранит в текущую сессию.</div><label class="q-field row no-wrap items-start q-field--standard q-select q-field--auto-height q-select--without-input q-select--without-chips q-select--single q-field--float q-field--labeled w-64" for="f_fd8935ad-2908-486b-8256-b1be9f985be0"><!----><div class="q-field__inner relative-position col self-stretch"><div class="q-field__control relative-position row no-wrap" tabindex="-1"><div class="q-field__control-container col relative-position row no-wrap q-anchor--skip"><div class="q-field__label no-pointer-events absolute ellipsis">Сотрудник</div><div class="q-field__native row items-center" id="c8" loopback="true"><span class="ellipsis">Иванов И.И.</span><input class="q-select__focus-target" id="f_fd8935ad-2908-486b-8256-b1be9f985be0" readonly="readonly" tabindex="0" role="combobox" aria-label="Сотрудник" aria-readonly="false" aria-autocomplete="none" aria-expanded="false" aria-controls="f_fd8935ad-2908-486b-8256-b1be9f985be0_lb" value="Иванов И.И."></div></div><div class="q-field__append q-field__marginal row no-wrap items-center q-anchor--skip"><i class="q-icon notranslate material-icons q-select__dropdown-icon" aria-hidden="true">arrow_drop_down</i></div><!----></div><!----></div><!----></label><div class="q-card nicegui-card w-full" id="c9"><div id="c11" class="nicegui-row row items-center gap-4 w-full"><div id="c12" class="w-96 text-sm">Заведение и анализ требований  (Проф навыки, вес 3)</div><div class="q-slider q-slider--h q-slider--inactive inline no-wrap column q-slider--enabled q-slider--editable flex-1" role="slider" aria-valuemin="1" aria-valuemax="5" aria-orientation="horizontal" data-step="1" aria-valuenow="5" id="c13" loopback="true"><div class="q-slider__track-container q-slider__track-container--h" tabindex="0"><div class="q-slider__track relative-position no-outline" style="height: 4px;"><div class="q-slider__inner absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__selection absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__thumb q-slider__thumb--h q-slider__thumb--h-ltr absolute non-selectable" style="width: 20px; height: 20px; left: 100%;"><svg class="q-slider__thumb-shape absolute-full" viewBox="0 0 20 20" aria-hidden="true"><path d="M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"></path></svg><div class="q-slider__focus-ring fit"></div></div></div></div></div></div><div id="c14" class="nicegui-row row items-center gap-4 w-full"><div id="c15" class="w-96 text-sm">Тест-дизайн  (Проф навыки, вес 3)</div><div class="q-slider q-slider--h q-slider--inactive inline no-wrap column q-slider--enabled q-slider--editable flex-1" role="slider" aria-valuemin="1" aria-valuemax="5" aria-orientation="horizontal" data-step="1" aria-valuenow="5" id="c16" loopback="true"><div class="q-slider__track-container q-slider__track-container--h" tabindex="0"><div class="q-slider__track relative-position no-outline" style="height: 4px;"><div class="q-slider__inner absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__selection absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__thumb q-slider__thumb--h q-slider__thumb--h-ltr absolute non-selectable" style="width: 20px; height: 20px; left: 100%;"><svg class="q-slider__thumb-shape absolute-full" viewBox="0 0 20 20" aria-hidden="true"><path d="M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"></path></svg><div class="q-slider__focus-ring fit"></div></div></div></div></div></div><div id="c17" class="nicegui-row row items-center gap-4 w-full"><div id="c18" class="w-96 text-sm">Регрессионное тестирование  (Проф навыки, вес 3)</div><div class="q-slider q-slider--h q-slider--inactive inline no-wrap column q-slider--enabled q-slider--editable flex-1" role="slider" aria-valuemin="1" aria-valuemax="5" aria-orientation="horizontal" data-step="1" aria-valuenow="5" id="c19" loopback="true"><div class="q-slider__track-container q-slider__track-container--h" tabindex="0"><div class="q-slider__track relative-position no-outline" style="height: 4px;"><div class="q-slider__inner absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__selection absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__thumb q-slider__thumb--h q-slider__thumb--h-ltr absolute non-selectable" style="width: 20px; height: 20px; left: 100%;"><svg class="q-slider__thumb-shape absolute-full" viewBox="0 0 20 20" aria-hidden="true"><path d="M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"></path></svg><div class="q-slider__focus-ring fit"></div></div></div></div></div></div><div id="c20" class="nicegui-row row items-center gap-4 w-full"><div id="c21" class="w-96 text-sm">Тестовая документация  (Проф навыки, вес 3)</div><div class="q-slider q-slider--h q-slider--inactive inline no-wrap column q-slider--enabled q-slider--editable flex-1" role="slider" aria-valuemin="1" aria-valuemax="5" aria-orientation="horizontal" data-step="1" aria-valuenow="4" id="c22" loopback="true"><div class="q-slider__track-container q-slider__track-container--h" tabindex="0"><div class="q-slider__track relative-position no-outline" style="height: 4px;"><div class="q-slider__inner absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__selection absolute" style="left: 0%; width: 75%;"></div><div class="q-slider__thumb q-slider__thumb--h q-slider__thumb--h-ltr absolute non-selectable" style="width: 20px; height: 20px; left: 75%;"><svg class="q-slider__thumb-shape absolute-full" viewBox="0 0 20 20" aria-hidden="true"><path d="M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"></path></svg><div class="q-slider__focus-ring fit"></div></div></div></div></div></div><div id="c23" class="nicegui-row row items-center gap-4 w-full"><div id="c24" class="w-96 text-sm">Оценка и планирование тестирования  (Проф навыки, вес 3)</div><div class="q-slider q-slider--h q-slider--inactive inline no-wrap column q-slider--enabled q-slider--editable flex-1" role="slider" aria-valuemin="1" aria-valuemax="5" aria-orientation="horizontal" data-step="1" aria-valuenow="4" id="c25" loopback="true"><div class="q-slider__track-container q-slider__track-container--h" tabindex="0"><div class="q-slider__track relative-position no-outline" style="height: 4px;"><div class="q-slider__inner absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__selection absolute" style="left: 0%; width: 75%;"></div><div class="q-slider__thumb q-slider__thumb--h q-slider__thumb--h-ltr absolute non-selectable" style="width: 20px; height: 20px; left: 75%;"><svg class="q-slider__thumb-shape absolute-full" viewBox="0 0 20 20" aria-hidden="true"><path d="M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"></path></svg><div class="q-slider__focus-ring fit"></div></div></div></div></div></div><div id="c26" class="nicegui-row row items-center gap-4 w-full"><div id="c27" class="w-96 text-sm">API-тестирование  (Проф навыки, вес 3)</div><div class="q-slider q-slider--h q-slider--inactive inline no-wrap column q-slider--enabled q-slider--editable flex-1" role="slider" aria-valuemin="1" aria-valuemax="5" aria-orientation="horizontal" data-step="1" aria-valuenow="4" id="c28" loopback="true"><div class="q-slider__track-container q-slider__track-container--h" tabindex="0"><div class="q-slider__track relative-position no-outline" style="height: 4px;"><div class="q-slider__inner absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__selection absolute" style="left: 0%; width: 75%;"></div><div class="q-slider__thumb q-slider__thumb--h q-slider__thumb--h-ltr absolute non-selectable" style="width: 20px; height: 20px; left: 75%;"><svg class="q-slider__thumb-shape absolute-full" viewBox="0 0 20 20" aria-hidden="true"><path d="M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"></path></svg><div class="q-slider__focus-ring fit"></div></div></div></div></div></div><div id="c29" class="nicegui-row row items-center gap-4 w-full"><div id="c30" class="w-96 text-sm">Работа с дефектами и логами  (Проф навыки, вес 3)</div><div class="q-slider q-slider--h q-slider--inactive inline no-wrap column q-slider--enabled q-slider--editable flex-1" role="slider" aria-valuemin="1" aria-valuemax="5" aria-orientation="horizontal" data-step="1" aria-valuenow="4" id="c31" loopback="true"><div class="q-slider__track-container q-slider__track-container--h" tabindex="0"><div class="q-slider__track relative-position no-outline" style="height: 4px;"><div class="q-slider__inner absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__selection absolute" style="left: 0%; width: 75%;"></div><div class="q-slider__thumb q-slider__thumb--h q-slider__thumb--h-ltr absolute non-selectable" style="width: 20px; height: 20px; left: 75%;"><svg class="q-slider__thumb-shape absolute-full" viewBox="0 0 20 20" aria-hidden="true"><path d="M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"></path></svg><div class="q-slider__focus-ring fit"></div></div></div></div></div></div><div id="c32" class="nicegui-row row items-center gap-4 w-full"><div id="c33" class="w-96 text-sm">Нагрузочное тестирование  (Проф навыки, вес 2)</div><div class="q-slider q-slider--h q-slider--inactive inline no-wrap column q-slider--enabled q-slider--editable flex-1" role="slider" aria-valuemin="1" aria-valuemax="5" aria-orientation="horizontal" data-step="1" aria-valuenow="3" id="c34" loopback="true"><div class="q-slider__track-container q-slider__track-container--h" tabindex="0"><div class="q-slider__track relative-position no-outline" style="height: 4px;"><div class="q-slider__inner absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__selection absolute" style="left: 0%; width: 50%;"></div><div class="q-slider__thumb q-slider__thumb--h q-slider__thumb--h-ltr absolute non-selectable" style="width: 20px; height: 20px; left: 50%;"><svg class="q-slider__thumb-shape absolute-full" viewBox="0 0 20 20" aria-hidden="true"><path d="M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"></path></svg><div class="q-slider__focus-ring fit"></div></div></div></div></div></div><div id="c35" class="nicegui-row row items-center gap-4 w-full"><div id="c36" class="w-96 text-sm">Управление релизами  (Проф навыки, вес 2)</div><div class="q-slider q-slider--h q-slider--inactive inline no-wrap column q-slider--enabled q-slider--editable flex-1" role="slider" aria-valuemin="1" aria-valuemax="5" aria-orientation="horizontal" data-step="1" aria-valuenow="3" id="c37" loopback="true"><div class="q-slider__track-container q-slider__track-container--h" tabindex="0"><div class="q-slider__track relative-position no-outline" style="height: 4px;"><div class="q-slider__inner absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__selection absolute" style="left: 0%; width: 50%;"></div><div class="q-slider__thumb q-slider__thumb--h q-slider__thumb--h-ltr absolute non-selectable" style="width: 20px; height: 20px; left: 50%;"><svg class="q-slider__thumb-shape absolute-full" viewBox="0 0 20 20" aria-hidden="true"><path d="M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"></path></svg><div class="q-slider__focus-ring fit"></div></div></div></div></div></div><div id="c38" class="nicegui-row row items-center gap-4 w-full"><div id="c39" class="w-96 text-sm">Менторинг и развитие команды  (Проф навыки, вес 2)</div><div class="q-slider q-slider--h q-slider--inactive inline no-wrap column q-slider--enabled q-slider--editable flex-1" role="slider" aria-valuemin="1" aria-valuemax="5" aria-orientation="horizontal" data-step="1" aria-valuenow="2" id="c40" loopback="true"><div class="q-slider__track-container q-slider__track-container--h" tabindex="0"><div class="q-slider__track relative-position no-outline" style="height: 4px;"><div class="q-slider__inner absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__selection absolute" style="left: 0%; width: 25%;"></div><div class="q-slider__thumb q-slider__thumb--h q-slider__thumb--h-ltr absolute non-selectable" style="width: 20px; height: 20px; left: 25%;"><svg class="q-slider__thumb-shape absolute-full" viewBox="0 0 20 20" aria-hidden="true"><path d="M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"></path></svg><div class="q-slider__focus-ring fit"></div></div></div></div></div></div><div id="c41" class="nicegui-row row items-center gap-4 w-full"><div id="c42" class="w-96 text-sm">Управление рисками  (Проф навыки, вес 2)</div><div class="q-slider q-slider--h q-slider--inactive inline no-wrap column q-slider--enabled q-slider--editable flex-1" role="slider" aria-valuemin="1" aria-valuemax="5" aria-orientation="horizontal" data-step="1" aria-valuenow="3" id="c43" loopback="true"><div class="q-slider__track-container q-slider__track-container--h" tabindex="0"><div class="q-slider__track relative-position no-outline" style="height: 4px;"><div class="q-slider__inner absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__selection absolute" style="left: 0%; width: 50%;"></div><div class="q-slider__thumb q-slider__thumb--h q-slider__thumb--h-ltr absolute non-selectable" style="width: 20px; height: 20px; left: 50%;"><svg class="q-slider__thumb-shape absolute-full" viewBox="0 0 20 20" aria-hidden="true"><path d="M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"></path></svg><div class="q-slider__focus-ring fit"></div></div></div></div></div></div><div id="c44" class="nicegui-row row items-center gap-4 w-full"><div id="c45" class="w-96 text-sm">Postman  (Инструменты, вес 1)</div><div class="q-slider q-slider--h q-slider--inactive inline no-wrap column q-slider--enabled q-slider--editable flex-1" role="slider" aria-valuemin="1" aria-valuemax="5" aria-orientation="horizontal" data-step="1" aria-valuenow="5" id="c46" loopback="true"><div class="q-slider__track-container q-slider__track-container--h" tabindex="0"><div class="q-slider__track relative-position no-outline" style="height: 4px;"><div class="q-slider__inner absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__selection absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__thumb q-slider__thumb--h q-slider__thumb--h-ltr absolute non-selectable" style="width: 20px; height: 20px; left: 100%;"><svg class="q-slider__thumb-shape absolute-full" viewBox="0 0 20 20" aria-hidden="true"><path d="M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"></path></svg><div class="q-slider__focus-ring fit"></div></div></div></div></div></div><div id="c47" class="nicegui-row row items-center gap-4 w-full"><div id="c48" class="w-96 text-sm">Jira  (Инструменты, вес 1)</div><div class="q-slider q-slider--h q-slider--inactive inline no-wrap column q-slider--enabled q-slider--editable flex-1" role="slider" aria-valuemin="1" aria-valuemax="5" aria-orientation="horizontal" data-step="1" aria-valuenow="4" id="c49" loopback="true"><div class="q-slider__track-container q-slider__track-container--h" tabindex="0"><div class="q-slider__track relative-position no-outline" style="height: 4px;"><div class="q-slider__inner absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__selection absolute" style="left: 0%; width: 75%;"></div><div class="q-slider__thumb q-slider__thumb--h q-slider__thumb--h-ltr absolute non-selectable" style="width: 20px; height: 20px; left: 75%;"><svg class="q-slider__thumb-shape absolute-full" viewBox="0 0 20 20" aria-hidden="true"><path d="M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"></path></svg><div class="q-slider__focus-ring fit"></div></div></div></div></div></div><div id="c50" class="nicegui-row row items-center gap-4 w-full"><div id="c51" class="w-96 text-sm">Confluence  (Инструменты, вес 1)</div><div class="q-slider q-slider--h q-slider--inactive inline no-wrap column q-slider--enabled q-slider--editable flex-1" role="slider" aria-valuemin="1" aria-valuemax="5" aria-orientation="horizontal" data-step="1" aria-valuenow="4" id="c52" loopback="true"><div class="q-slider__track-container q-slider__track-container--h" tabindex="0"><div class="q-slider__track relative-position no-outline" style="height: 4px;"><div class="q-slider__inner absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__selection absolute" style="left: 0%; width: 75%;"></div><div class="q-slider__thumb q-slider__thumb--h q-slider__thumb--h-ltr absolute non-selectable" style="width: 20px; height: 20px; left: 75%;"><svg class="q-slider__thumb-shape absolute-full" viewBox="0 0 20 20" aria-hidden="true"><path d="M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"></path></svg><div class="q-slider__focus-ring fit"></div></div></div></div></div></div><div id="c53" class="nicegui-row row items-center gap-4 w-full"><div id="c54" class="w-96 text-sm">PostgreSQL / SQL  (Инструменты, вес 1)</div><div class="q-slider q-slider--h q-slider--inactive inline no-wrap column q-slider--enabled q-slider--editable flex-1" role="slider" aria-valuemin="1" aria-valuemax="5" aria-orientation="horizontal" data-step="1" aria-valuenow="4" id="c55" loopback="true"><div class="q-slider__track-container q-slider__track-container--h" tabindex="0"><div class="q-slider__track relative-position no-outline" style="height: 4px;"><div class="q-slider__inner absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__selection absolute" style="left: 0%; width: 75%;"></div><div class="q-slider__thumb q-slider__thumb--h q-slider__thumb--h-ltr absolute non-selectable" style="width: 20px; height: 20px; left: 75%;"><svg class="q-slider__thumb-shape absolute-full" viewBox="0 0 20 20" aria-hidden="true"><path d="M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"></path></svg><div class="q-slider__focus-ring fit"></div></div></div></div></div></div><div id="c56" class="nicegui-row row items-center gap-4 w-full"><div id="c57" class="w-96 text-sm">Graylog  (Инструменты, вес 1)</div><div class="q-slider q-slider--h q-slider--inactive inline no-wrap column q-slider--enabled q-slider--editable flex-1" role="slider" aria-valuemin="1" aria-valuemax="5" aria-orientation="horizontal" data-step="1" aria-valuenow="3" id="c58" loopback="true"><div class="q-slider__track-container q-slider__track-container--h" tabindex="0"><div class="q-slider__track relative-position no-outline" style="height: 4px;"><div class="q-slider__inner absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__selection absolute" style="left: 0%; width: 50%;"></div><div class="q-slider__thumb q-slider__thumb--h q-slider__thumb--h-ltr absolute non-selectable" style="width: 20px; height: 20px; left: 50%;"><svg class="q-slider__thumb-shape absolute-full" viewBox="0 0 20 20" aria-hidden="true"><path d="M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"></path></svg><div class="q-slider__focus-ring fit"></div></div></div></div></div></div><div id="c59" class="nicegui-row row items-center gap-4 w-full"><div id="c60" class="w-96 text-sm">Grafana  (Инструменты, вес 1)</div><div class="q-slider q-slider--h q-slider--inactive inline no-wrap column q-slider--enabled q-slider--editable flex-1" role="slider" aria-valuemin="1" aria-valuemax="5" aria-orientation="horizontal" data-step="1" aria-valuenow="3" id="c61" loopback="true"><div class="q-slider__track-container q-slider__track-container--h" tabindex="0"><div class="q-slider__track relative-position no-outline" style="height: 4px;"><div class="q-slider__inner absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__selection absolute" style="left: 0%; width: 50%;"></div><div class="q-slider__thumb q-slider__thumb--h q-slider__thumb--h-ltr absolute non-selectable" style="width: 20px; height: 20px; left: 50%;"><svg class="q-slider__thumb-shape absolute-full" viewBox="0 0 20 20" aria-hidden="true"><path d="M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"></path></svg><div class="q-slider__focus-ring fit"></div></div></div></div></div></div><div id="c62" class="nicegui-row row items-center gap-4 w-full"><div id="c63" class="w-96 text-sm">Apache JMeter  (Инструменты, вес 1)</div><div class="q-slider q-slider--h q-slider--inactive inline no-wrap column q-slider--enabled q-slider--editable flex-1" role="slider" aria-valuemin="1" aria-valuemax="5" aria-orientation="horizontal" data-step="1" aria-valuenow="3" id="c64" loopback="true"><div class="q-slider__track-container q-slider__track-container--h" tabindex="0"><div class="q-slider__track relative-position no-outline" style="height: 4px;"><div class="q-slider__inner absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__selection absolute" style="left: 0%; width: 50%;"></div><div class="q-slider__thumb q-slider__thumb--h q-slider__thumb--h-ltr absolute non-selectable" style="width: 20px; height: 20px; left: 50%;"><svg class="q-slider__thumb-shape absolute-full" viewBox="0 0 20 20" aria-hidden="true"><path d="M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"></path></svg><div class="q-slider__focus-ring fit"></div></div></div></div></div></div><div id="c65" class="nicegui-row row items-center gap-4 w-full"><div id="c66" class="w-96 text-sm">Charles Proxy  (Инструменты, вес 1)</div><div class="q-slider q-slider--h q-slider--inactive inline no-wrap column q-slider--enabled q-slider--editable flex-1" role="slider" aria-valuemin="1" aria-valuemax="5" aria-orientation="horizontal" data-step="1" aria-valuenow="3" id="c67" loopback="true"><div class="q-slider__track-container q-slider__track-container--h" tabindex="0"><div class="q-slider__track relative-position no-outline" style="height: 4px;"><div class="q-slider__inner absolute" style="left: 0%; width: 100%;"></div><div class="q-slider__selection absolute" style="left: 0%; width: 50%;"></div><div class="q-slider__thumb q-slider__thumb--h q-slider__thumb--h-ltr absolute non-selectable" style="width: 20px; height: 20px; left: 50%;"><svg class="q-slider__thumb-shape absolute-full" viewBox="0 0 20 20" aria-hidden="true"><path d="M 4, 10 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0"></path></svg><div class="q-slider__focus-ring fit"></div></div></div></div></div></div></div><button class="q-btn q-btn-item non-selectable no-outline q-btn--standard q-btn--rectangle bg-primary text-white q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c68"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">💾 Применить к сессии</span></span></button><div id="c69" class="text-h6 mt-4">Текущая матрица оценок</div><div class="q-table__container q-table--horizontal-separator column no-wrap q-table__card q-table--no-wrap w-full" id="c70"><!----><div class="q-table__middle scroll"><table class="q-table"><thead><tr><th class="text-right">Компетенция</th><th class="text-right">Иванов И.И.</th><th class="text-right">Петров П.П.</th><th class="text-right">Сидоров С.С.</th><th class="text-right">Смирнова А.А.</th></tr></thead><tbody><tr class=""><td class="text-right">Заведение и анализ требований</td><td class="text-right">5</td><td class="text-right">4</td><td class="text-right">4</td><td class="text-right">3</td></tr><tr class=""><td class="text-right">Тест-дизайн</td><td class="text-right">5</td><td class="text-right">4</td><td class="text-right">4</td><td class="text-right">3</td></tr><tr class=""><td class="text-right">Регрессионное тестирование</td><td class="text-right">5</td><td class="text-right">5</td><td class="text-right">3</td><td class="text-right">3</td></tr><tr class=""><td class="text-right">Тестовая документация</td><td class="text-right">4</td><td class="text-right">4</td><td class="text-right">3</td><td class="text-right">3</td></tr><tr class=""><td class="text-right">Оценка и планирование тестирования</td><td class="text-right">4</td><td class="text-right">3</td><td class="text-right">4</td><td class="text-right">2</td></tr><tr class=""><td class="text-right">API-тестирование</td><td class="text-right">4</td><td class="text-right">4</td><td class="text-right">3</td><td class="text-right">3</td></tr><tr class=""><td class="text-right">Работа с дефектами и логами</td><td class="text-right">4</td><td class="text-right">4</td><td class="text-right">3</td><td class="text-right">3</td></tr><tr class=""><td class="text-right">Нагрузочное тестирование</td><td class="text-right">3</td><td class="text-right">3</td><td class="text-right">2</td><td class="text-right">2</td></tr><tr class=""><td class="text-right">Управление релизами</td><td class="text-right">3</td><td class="text-right">3</td><td class="text-right">4</td><td class="text-right">2</td></tr><tr class=""><td class="text-right">Менторинг и развитие команды</td><td class="text-right">2</td><td class="text-right">3</td><td class="text-right">2</td><td class="text-right">3</td></tr><tr class=""><td class="text-right">Управление рисками</td><td class="text-right">3</td><td class="text-right">3</td><td class="text-right">4</td><td class="text-right">2</td></tr><tr class=""><td class="text-right">Postman</td><td class="text-right">5</td><td class="text-right">4</td><td class="text-right">5</td><td class="text-right">4</td></tr><tr class=""><td class="text-right">Jira</td><td class="text-right">4</td><td class="text-right">5</td><td class="text-right">4</td><td class="text-right">3</td></tr><tr class=""><td class="text-right">Confluence</td><td class="text-right">4</td><td class="text-right">4</td><td class="text-right">4</td><td class="text-right">3</td></tr><tr class=""><td class="text-right">PostgreSQL / SQL</td><td class="text-right">4</td><td class="text-right">3</td><td class="text-right">5</td><td class="text-right">3</td></tr><tr class=""><td class="text-right">Graylog</td><td class="text-right">3</td><td class="text-right">4</td><td class="text-right">4</td><td class="text-right">2</td></tr><tr class=""><td class="text-right">Grafana</td><td class="text-right">3</td><td class="text-right">4</td><td class="text-right">3</td><td class="text-right">2</td></tr><tr class=""><td class="text-right">Apache JMeter</td><td class="text-right">3</td><td class="text-right">3</td><td class="text-right">2</td><td class="text-right">2</td></tr><tr class=""><td class="text-right">Charles Proxy</td><td class="text-right">3</td><td class="text-right">4</td><td class="text-right">3</td><td class="text-right">2</td></tr></tbody></table></div><!----></div></div><div id="c71" class="nicegui-row row fixed bottom-0 left-0 w-full bg-white shadow-2 justify-center gap-2 p-2"><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c72"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">📊 Дашборд</span></span></button><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c73"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">👥 Команда</span></span></button><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c74"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">🎯 Оценки</span></span></button><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c75"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">🏁 Цели</span></span></button><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c76"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">💰 Премия</span></span></button><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c77"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">📥 Экспорт</span></span></button></div></div></main></div></div></div>
+    <div id="nicegui-keep-alive-cache" style="display: none" aria-hidden="true"></div>
+    <div id="popup" class="nicegui-error-popup" aria-hidden="true">
+      <span>Connection lost.</span>
+      <span>Trying to reconnect...</span>
+    </div>
+    <div id="too_long_message_popup" class="nicegui-error-popup" aria-hidden="true">
+      <span>Message too long</span>
+      <span>The message is too large for WebSocket transmission.</span>
+    </div>
+    <script type="module">
+      // Load DOMPurify for HTML sanitization
+      // NOTE: Always use DOMPurify instead of native setHTML because native setHTML strips class attributes.
+      import DOMPurify from "dompurify";
+      Element.prototype.setHTML = function (html) {
+        this.innerHTML = DOMPurify.sanitize(html);
+      };
+
+      const app = createApp(parseElements(String.raw`{"0":{"tag":"q-layout","class":["nicegui-layout"],"props":{"view":"hHh lpr fff"},"children":[4,1],"events":[{"listener_id":"5941a0e6-0b57-4f88-984f-be02f28d590d","type":"sub_pages_open","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"75b08eb4-c07a-4101-82b9-ba20640bbb55","type":"sub_pages_navigate","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"1":{"tag":"q-page-container","children":[2]},"2":{"tag":"q-page","children":[3]},"3":{"tag":"div","class":["nicegui-content"],"children":[6,71]},"4":{"tag":"nicegui-header","class":["nicegui-header","wrap","bg-blue-9"],"props":{"model-value":true,"loopback":true,"bordered":false,"elevated":false,"add-scroll-padding":true},"children":[5],"events":[{"listener_id":"d2fc3a8a-7a62-4a54-a188-01c55e53898c","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"5":{"tag":"div","text":"🎯 Оценки компетенций","class":["text-h6","font-bold"]},"6":{"tag":"div","class":["nicegui-column","p-4","w-full","max-w-6xl","mx-auto","gap-4"],"children":[7,8,9,68,69,70]},"7":{"tag":"div","text":"Балл 1–5 по каждой компетенции. Кнопка сохранит в текущую сессию.","class":["text-caption","text-grey-7"]},"8":{"tag":"nicegui-select","class":["w-64"],"props":{"model-value":{"value":0,"label":"Иванов И.И."},"loopback":true,"options":[{"value":0,"label":"Иванов И.И."},{"value":1,"label":"Петров П.П."},{"value":2,"label":"Сидоров С.С."},{"value":3,"label":"Смирнова А.А."}],"error":null,"label":"Сотрудник"},"events":[{"listener_id":"ca9f6e31-5407-4644-a3c1-f200ffef893c","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"8e5a22a0-9935-4e52-af49-0f682b4c9438","type":"popupShow","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"177011af-058b-4bb8-8b6c-56de714116bd","type":"popupHide","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"9":{"tag":"q-card","class":["nicegui-card","w-full"],"children":[10]},"10":{"tag":"nicegui-refreshable","children":[11,14,17,20,23,26,29,32,35,38,41,44,47,50,53,56,59,62,65]},"11":{"tag":"div","class":["nicegui-row","row","items-center","gap-4","w-full"],"children":[12,13]},"12":{"tag":"div","text":"Заведение и анализ требований  (Проф навыки, вес 3)","class":["w-96","text-sm"]},"13":{"tag":"q-slider","class":["flex-1"],"props":{"model-value":5,"loopback":true,"min":1,"max":5,"step":1},"events":[{"listener_id":"3133870e-17c9-4247-bfc9-db814f2f93e7","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0.05,"leading_events":true,"trailing_events":true,"js_handler":null}]},"14":{"tag":"div","class":["nicegui-row","row","items-center","gap-4","w-full"],"children":[15,16]},"15":{"tag":"div","text":"Тест-дизайн  (Проф навыки, вес 3)","class":["w-96","text-sm"]},"16":{"tag":"q-slider","class":["flex-1"],"props":{"model-value":5,"loopback":true,"min":1,"max":5,"step":1},"events":[{"listener_id":"9104ab5c-af30-4267-a9d1-06473b830499","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0.05,"leading_events":true,"trailing_events":true,"js_handler":null}]},"17":{"tag":"div","class":["nicegui-row","row","items-center","gap-4","w-full"],"children":[18,19]},"18":{"tag":"div","text":"Регрессионное тестирование  (Проф навыки, вес 3)","class":["w-96","text-sm"]},"19":{"tag":"q-slider","class":["flex-1"],"props":{"model-value":5,"loopback":true,"min":1,"max":5,"step":1},"events":[{"listener_id":"46678ad0-bf3b-4b77-be8b-b385879037fd","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0.05,"leading_events":true,"trailing_events":true,"js_handler":null}]},"20":{"tag":"div","class":["nicegui-row","row","items-center","gap-4","w-full"],"children":[21,22]},"21":{"tag":"div","text":"Тестовая документация  (Проф навыки, вес 3)","class":["w-96","text-sm"]},"22":{"tag":"q-slider","class":["flex-1"],"props":{"model-value":4,"loopback":true,"min":1,"max":5,"step":1},"events":[{"listener_id":"2891286a-80fe-48ff-964e-f02a0e6738e2","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0.05,"leading_events":true,"trailing_events":true,"js_handler":null}]},"23":{"tag":"div","class":["nicegui-row","row","items-center","gap-4","w-full"],"children":[24,25]},"24":{"tag":"div","text":"Оценка и планирование тестирования  (Проф навыки, вес 3)","class":["w-96","text-sm"]},"25":{"tag":"q-slider","class":["flex-1"],"props":{"model-value":4,"loopback":true,"min":1,"max":5,"step":1},"events":[{"listener_id":"26536492-8a3e-487e-905c-2079988c488c","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0.05,"leading_events":true,"trailing_events":true,"js_handler":null}]},"26":{"tag":"div","class":["nicegui-row","row","items-center","gap-4","w-full"],"children":[27,28]},"27":{"tag":"div","text":"API-тестирование  (Проф навыки, вес 3)","class":["w-96","text-sm"]},"28":{"tag":"q-slider","class":["flex-1"],"props":{"model-value":4,"loopback":true,"min":1,"max":5,"step":1},"events":[{"listener_id":"0734cf86-20d7-44a5-89e6-3d345b5cd3f9","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0.05,"leading_events":true,"trailing_events":true,"js_handler":null}]},"29":{"tag":"div","class":["nicegui-row","row","items-center","gap-4","w-full"],"children":[30,31]},"30":{"tag":"div","text":"Работа с дефектами и логами  (Проф навыки, вес 3)","class":["w-96","text-sm"]},"31":{"tag":"q-slider","class":["flex-1"],"props":{"model-value":4,"loopback":true,"min":1,"max":5,"step":1},"events":[{"listener_id":"789e3a39-3ceb-44a1-a457-221a83caca8c","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0.05,"leading_events":true,"trailing_events":true,"js_handler":null}]},"32":{"tag":"div","class":["nicegui-row","row","items-center","gap-4","w-full"],"children":[33,34]},"33":{"tag":"div","text":"Нагрузочное тестирование  (Проф навыки, вес 2)","class":["w-96","text-sm"]},"34":{"tag":"q-slider","class":["flex-1"],"props":{"model-value":3,"loopback":true,"min":1,"max":5,"step":1},"events":[{"listener_id":"9a19a529-07ce-4d54-9807-b2f672d57658","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0.05,"leading_events":true,"trailing_events":true,"js_handler":null}]},"35":{"tag":"div","class":["nicegui-row","row","items-center","gap-4","w-full"],"children":[36,37]},"36":{"tag":"div","text":"Управление релизами  (Проф навыки, вес 2)","class":["w-96","text-sm"]},"37":{"tag":"q-slider","class":["flex-1"],"props":{"model-value":3,"loopback":true,"min":1,"max":5,"step":1},"events":[{"listener_id":"e81b3903-c693-42f8-b929-569f206ed7ba","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0.05,"leading_events":true,"trailing_events":true,"js_handler":null}]},"38":{"tag":"div","class":["nicegui-row","row","items-center","gap-4","w-full"],"children":[39,40]},"39":{"tag":"div","text":"Менторинг и развитие команды  (Проф навыки, вес 2)","class":["w-96","text-sm"]},"40":{"tag":"q-slider","class":["flex-1"],"props":{"model-value":2,"loopback":true,"min":1,"max":5,"step":1},"events":[{"listener_id":"16e8d76e-be13-4e0e-af2e-7731049b14fb","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0.05,"leading_events":true,"trailing_events":true,"js_handler":null}]},"41":{"tag":"div","class":["nicegui-row","row","items-center","gap-4","w-full"],"children":[42,43]},"42":{"tag":"div","text":"Управление рисками  (Проф навыки, вес 2)","class":["w-96","text-sm"]},"43":{"tag":"q-slider","class":["flex-1"],"props":{"model-value":3,"loopback":true,"min":1,"max":5,"step":1},"events":[{"listener_id":"3d493dd3-6f85-459b-8a93-dd7f4e06744c","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0.05,"leading_events":true,"trailing_events":true,"js_handler":null}]},"44":{"tag":"div","class":["nicegui-row","row","items-center","gap-4","w-full"],"children":[45,46]},"45":{"tag":"div","text":"Postman  (Инструменты, вес 1)","class":["w-96","text-sm"]},"46":{"tag":"q-slider","class":["flex-1"],"props":{"model-value":5,"loopback":true,"min":1,"max":5,"step":1},"events":[{"listener_id":"1ae2ee03-da9c-414f-809c-865afc7504f5","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0.05,"leading_events":true,"trailing_events":true,"js_handler":null}]},"47":{"tag":"div","class":["nicegui-row","row","items-center","gap-4","w-full"],"children":[48,49]},"48":{"tag":"div","text":"Jira  (Инструменты, вес 1)","class":["w-96","text-sm"]},"49":{"tag":"q-slider","class":["flex-1"],"props":{"model-value":4,"loopback":true,"min":1,"max":5,"step":1},"events":[{"listener_id":"139c6d52-adee-418d-ba94-5103b1e52136","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0.05,"leading_events":true,"trailing_events":true,"js_handler":null}]},"50":{"tag":"div","class":["nicegui-row","row","items-center","gap-4","w-full"],"children":[51,52]},"51":{"tag":"div","text":"Confluence  (Инструменты, вес 1)","class":["w-96","text-sm"]},"52":{"tag":"q-slider","class":["flex-1"],"props":{"model-value":4,"loopback":true,"min":1,"max":5,"step":1},"events":[{"listener_id":"8d41a83d-f167-4b14-b229-d99344cd5c1e","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0.05,"leading_events":true,"trailing_events":true,"js_handler":null}]},"53":{"tag":"div","class":["nicegui-row","row","items-center","gap-4","w-full"],"children":[54,55]},"54":{"tag":"div","text":"PostgreSQL / SQL  (Инструменты, вес 1)","class":["w-96","text-sm"]},"55":{"tag":"q-slider","class":["flex-1"],"props":{"model-value":4,"loopback":true,"min":1,"max":5,"step":1},"events":[{"listener_id":"e5cbc2de-cdb0-4fa9-95a1-3a80e1467ae0","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0.05,"leading_events":true,"trailing_events":true,"js_handler":null}]},"56":{"tag":"div","class":["nicegui-row","row","items-center","gap-4","w-full"],"children":[57,58]},"57":{"tag":"div","text":"Graylog  (Инструменты, вес 1)","class":["w-96","text-sm"]},"58":{"tag":"q-slider","class":["flex-1"],"props":{"model-value":3,"loopback":true,"min":1,"max":5,"step":1},"events":[{"listener_id":"f41c9dc3-6547-46ee-a80f-dd165c8fc977","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0.05,"leading_events":true,"trailing_events":true,"js_handler":null}]},"59":{"tag":"div","class":["nicegui-row","row","items-center","gap-4","w-full"],"children":[60,61]},"60":{"tag":"div","text":"Grafana  (Инструменты, вес 1)","class":["w-96","text-sm"]},"61":{"tag":"q-slider","class":["flex-1"],"props":{"model-value":3,"loopback":true,"min":1,"max":5,"step":1},"events":[{"listener_id":"e679798e-611a-4eff-905a-9736ab08766d","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0.05,"leading_events":true,"trailing_events":true,"js_handler":null}]},"62":{"tag":"div","class":["nicegui-row","row","items-center","gap-4","w-full"],"children":[63,64]},"63":{"tag":"div","text":"Apache JMeter  (Инструменты, вес 1)","class":["w-96","text-sm"]},"64":{"tag":"q-slider","class":["flex-1"],"props":{"model-value":3,"loopback":true,"min":1,"max":5,"step":1},"events":[{"listener_id":"34142220-ecc0-46fc-9142-49d6b984b362","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0.05,"leading_events":true,"trailing_events":true,"js_handler":null}]},"65":{"tag":"div","class":["nicegui-row","row","items-center","gap-4","w-full"],"children":[66,67]},"66":{"tag":"div","text":"Charles Proxy  (Инструменты, вес 1)","class":["w-96","text-sm"]},"67":{"tag":"q-slider","class":["flex-1"],"props":{"model-value":3,"loopback":true,"min":1,"max":5,"step":1},"events":[{"listener_id":"2de590e5-877f-4ce7-a50b-fa7a3d09f303","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0.05,"leading_events":true,"trailing_events":true,"js_handler":null}]},"68":{"tag":"q-btn","props":{"color":"primary","label":"💾 Применить к сессии"},"events":[{"listener_id":"bc9c6368-5c0c-4b27-83c6-b8dc9ca35751","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"69":{"tag":"div","text":"Текущая матрица оценок","class":["text-h6","mt-4"]},"70":{"tag":"nicegui-table","class":["w-full"],"props":{"filter":null,"columns":[{"name":"Компетенция","label":"Компетенция","field":"Компетенция"},{"name":"Иванов И.И.","label":"Иванов И.И.","field":"Иванов И.И."},{"name":"Петров П.П.","label":"Петров П.П.","field":"Петров П.П."},{"name":"Сидоров С.С.","label":"Сидоров С.С.","field":"Сидоров С.С."},{"name":"Смирнова А.А.","label":"Смирнова А.А.","field":"Смирнова А.А."}],"rows":[{"Компетенция":"Заведение и анализ требований","Иванов И.И.":5,"Петров П.П.":4,"Сидоров С.С.":4,"Смирнова А.А.":3},{"Компетенция":"Тест-дизайн","Иванов И.И.":5,"Петров П.П.":4,"Сидоров С.С.":4,"Смирнова А.А.":3},{"Компетенция":"Регрессионное тестирование","Иванов И.И.":5,"Петров П.П.":5,"Сидоров С.С.":3,"Смирнова А.А.":3},{"Компетенция":"Тестовая документация","Иванов И.И.":4,"Петров П.П.":4,"Сидоров С.С.":3,"Смирнова А.А.":3},{"Компетенция":"Оценка и планирование тестирования","Иванов И.И.":4,"Петров П.П.":3,"Сидоров С.С.":4,"Смирнова А.А.":2},{"Компетенция":"API-тестирование","Иванов И.И.":4,"Петров П.П.":4,"Сидоров С.С.":3,"Смирнова А.А.":3},{"Компетенция":"Работа с дефектами и логами","Иванов И.И.":4,"Петров П.П.":4,"Сидоров С.С.":3,"Смирнова А.А.":3},{"Компетенция":"Нагрузочное тестирование","Иванов И.И.":3,"Петров П.П.":3,"Сидоров С.С.":2,"Смирнова А.А.":2},{"Компетенция":"Управление релизами","Иванов И.И.":3,"Петров П.П.":3,"Сидоров С.С.":4,"Смирнова А.А.":2},{"Компетенция":"Менторинг и развитие команды","Иванов И.И.":2,"Петров П.П.":3,"Сидоров С.С.":2,"Смирнова А.А.":3},{"Компетенция":"Управление рисками","Иванов И.И.":3,"Петров П.П.":3,"Сидоров С.С.":4,"Смирнова А.А.":2},{"Компетенция":"Postman","Иванов И.И.":5,"Петров П.П.":4,"Сидоров С.С.":5,"Смирнова А.А.":4},{"Компетенция":"Jira","Иванов И.И.":4,"Петров П.П.":5,"Сидоров С.С.":4,"Смирнова А.А.":3},{"Компетенция":"Confluence","Иванов И.И.":4,"Петров П.П.":4,"Сидоров С.С.":4,"Смирнова А.А.":3},{"Компетенция":"PostgreSQL / SQL","Иванов И.И.":4,"Петров П.П.":3,"Сидоров С.С.":5,"Смирнова А.А.":3},{"Компетенция":"Graylog","Иванов И.И.":3,"Петров П.П.":4,"Сидоров С.С.":4,"Смирнова А.А.":2},{"Компетенция":"Grafana","Иванов И.И.":3,"Петров П.П.":4,"Сидоров С.С.":3,"Смирнова А.А.":2},{"Компетенция":"Apache JMeter","Иванов И.И.":3,"Петров П.П.":3,"Сидоров С.С.":2,"Смирнова А.А.":2},{"Компетенция":"Charles Proxy","Иванов И.И.":3,"Петров П.П.":4,"Сидоров С.С.":3,"Смирнова А.А.":2}],"row-key":"Компетенция","hide-pagination":true,"pagination":{"rowsPerPage":0},"selection":"none","selected":[],"fullscreen":false},"events":[{"listener_id":"75bcf8f9-0341-49fd-8566-c28408a461a5","type":"selection","specials":[],"modifiers":[],"keys":[],"args":[["added","rows","keys"]],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"306f5643-f3c9-47ed-b808-9f14284d8fb4","type":"update:pagination","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"54ad1c8d-0a1a-45a7-9473-dfe246b00c70","type":"update:fullscreen","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"71":{"tag":"div","class":["nicegui-row","row","fixed","bottom-0","left-0","w-full","bg-white","shadow-2","justify-center","gap-2","p-2"],"children":[72,73,74,75,76,77]},"72":{"tag":"q-btn","props":{"color":"primary","label":"📊 Дашборд","flat":true},"events":[{"listener_id":"752c1c3f-88a9-487f-8afa-0747fd0d9549","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"73":{"tag":"q-btn","props":{"color":"primary","label":"👥 Команда","flat":true},"events":[{"listener_id":"61a26563-a226-49a2-9c25-974abb7474ac","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"74":{"tag":"q-btn","props":{"color":"primary","label":"🎯 Оценки","flat":true},"events":[{"listener_id":"8a29d493-630a-439c-b3a4-6e88eb199239","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"75":{"tag":"q-btn","props":{"color":"primary","label":"🏁 Цели","flat":true},"events":[{"listener_id":"e89e531c-ad95-40bd-b133-d9cf5719919f","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"76":{"tag":"q-btn","props":{"color":"primary","label":"💰 Премия","flat":true},"events":[{"listener_id":"827eebcf-1c3d-47d3-9c33-a923beedf676","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"77":{"tag":"q-btn","props":{"color":"primary","label":"📥 Экспорт","flat":true},"events":[{"listener_id":"f0975b9a-1cbc-4bb1-b527-aa2a0c595b41","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]}}`), {
+        version: "3.17.1",
+        prefix: "",
+        query: {'client_id': 'ff024932-f58e-4ab7-9851-4e6191500524', 'next_message_id': 0, 'implicit_handshake': True},
+        extraHeaders: {},
+        transports: ['websocket', 'polling'],
+      });
+      const dark = False;
+      const language = "en-US";
+      const vue_config = {"brand":{"primary":"#5898d4","secondary":"#26a69a","accent":"#9c27b0","dark":"#1d1d1d","dark-page":"#121212","positive":"#21ba45","negative":"#c10015","info":"#31ccec","warning":"#f2c037"},"loadingBar":{"color":"primary","skipHijack":false},"lang":{"noHtmlAttrs":true}};
+      
+        app.use(Quasar, {config: vue_config});
+        applyColors(vue_config.brand);
+        Quasar.lang.set(Quasar.lang[language.replace('-', '')]);
+        darkSetter = (dark) => Quasar.Dark.set(dark === None ? "auto" : dark);
+        setDark(dark);
+    
+
+      import { default as header } from "/_nicegui/3.17.1/components/2f192583031d92ca8f6edbdd4fe23d01/header.js";
+app.component("nicegui-header", header);
+import { default as select } from "/_nicegui/3.17.1/components/eb8ec46e76734b0535eb0539e6861986/select.js";
+app.component("nicegui-select", select);
+import { default as refreshable } from "/_nicegui/3.17.1/components/e37ff340cfb8d818cc64b0273ba05d26/refreshable.js";
+app.component("nicegui-refreshable", refreshable);
+import { default as table } from "/_nicegui/3.17.1/components/20b4dcf981e309571a749401a9fa1832/table.js";
+app.component("nicegui-table", table);
+      
+
+      app.mount("#app");
+
+      // Scroll to fragment after Vue mounts (browser's native scroll may have failed if element wasn't ready)
+      if (window.location.hash) {
+        Vue.nextTick(() => {
+          const fragment = window.location.hash.substring(1);
+          (document.getElementById(fragment) || document.querySelector(`a[name="${fragment}"]`))?.scrollIntoView();
+        });
+      }
+    </script>
+  
+<div id="q-loading-bar" data-v-app=""><div class="q-loading-bar q-loading-bar--top bg-primary" style="transform: translate3d(-100%, -200%, 0px); height: 2px; opacity: 0;" aria-hidden="true"></div></div><div id="q-notify" data-v-app=""><div class="q-notifications"><div class="q-notifications__list q-notifications__list--top fixed column no-wrap items-start"></div><div class="q-notifications__list q-notifications__list--top fixed column no-wrap items-end"></div><div class="q-notifications__list q-notifications__list--bottom fixed column no-wrap items-start"></div><div class="q-notifications__list q-notifications__list--bottom fixed column no-wrap items-end"></div><div class="q-notifications__list q-notifications__list--top fixed column no-wrap items-center"></div><div class="q-notifications__list q-notifications__list--bottom fixed column no-wrap items-center"></div><div class="q-notifications__list q-notifications__list--center fixed column no-wrap items-start justify-center"></div><div class="q-notifications__list q-notifications__list--center fixed column no-wrap items-end justify-center"></div><div class="q-notifications__list q-notifications__list--center fixed column no-wrap flex-center"></div></div></div></body></html>

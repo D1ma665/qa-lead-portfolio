@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html dir="ltr" style="scroll-padding-top: 64px;"><script src="05-salary_files/prompt_ORxm.js"></script><script src="05-salary_files/runScript_ORxm.js"></script><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>QA Grading System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta id="nicegui-color-scheme" name="color-scheme" content="light">
+    <link href="http://127.0.0.1:8080/_nicegui/3.17.1/static/favicon.ico" rel="shortcut icon">
+    <style>
+      @layer theme, base, quasar, nicegui, components, utilities, overrides, quasar_importants;
+      @import url("/_nicegui/3.17.1/static/fonts.css") layer(base);
+      
+        @import url("/_nicegui/3.17.1/static/quasar.unimportant.prod.css") layer(quasar);
+        @import url("/_nicegui/3.17.1/static/quasar.important.prod.css") layer(quasar_importants);
+      
+      @import url("/_nicegui/3.17.1/static/nicegui.css") layer(nicegui);
+      @layer quasar {
+        blockquote, dd, dl, figure, h1, h2, h3, h4, h5, h6, hr, p, pre {
+          margin: revert-layer; /* HACK: revert Quasar's margin styles */
+        }
+        code, kbd, pre, samp {
+          font-family: revert-layer; /* HACK: revert Quasar's monospace font so Tailwind's mono font stack applies */
+        }
+        /* DEPRECATED: mirror of quasarframework/quasar#18413 + #18419, remove with the Quasar bump for NiceGUI 4.0 */
+        [dir="rtl"] .q-fab__actions--right {
+          transform-origin: 0 50%;
+          right: auto;
+          margin-right: 0;
+          left: 100%;
+          margin-left: 9px;
+          flex-direction: row-reverse;
+        }
+        [dir="rtl"] .q-fab__actions--right:not(.q-fab__actions--opened) {
+          transform: scale(0.4) translateX(-62px);
+        }
+        [dir="rtl"] .q-fab__actions--left {
+          transform-origin: 100% 50%;
+          left: auto;
+          margin-left: 0;
+          right: 100%;
+          margin-right: 9px;
+          flex-direction: row;
+        }
+        [dir="rtl"] .q-fab__actions--left:not(.q-fab__actions--opened) {
+          transform: scale(0.4) translateX(62px);
+        }
+        /* DEPRECATED: mirror of quasarframework/quasar#18468, remove with the Quasar bump for NiceGUI 4.0 */
+        .q-position-engine {
+          visibility: hidden;
+        }
+      }
+      @layer overrides {
+        .rotate-45, .rotate-90, .rotate-135, .rotate-180, .rotate-225, .rotate-270, .rotate-315 {
+  rotate: 0deg;
+}
+        .column.inline, .flex.inline, .row.inline {
+          display: inline-flex;  /* HACK: re-apply Quasar's inline styles to override Tailwind */
+        }
+        .nicegui-dialog-open,
+        .nicegui-select-popup-open,
+        .nicegui-table-fullscreen {
+          scroll-behavior: auto !important; /* HACK: avoid smooth-scrolling when dialogs or select popups close */
+        }
+      }
+    </style>
+    <script type="importmap">
+      {"imports": {"vue":"/_nicegui/3.17.1/static/vue.esm-browser.prod.js","sass":"/_nicegui/3.17.1/static/sass.default.js","immutable":"/_nicegui/3.17.1/static/immutable.es.js","dompurify":"/_nicegui/3.17.1/static/dompurify.mjs","nicegui-aggrid":"/_nicegui/3.17.1/esm/41d36080838384136940763c99275350/index.js","nicegui-aggrid/":"/_nicegui/3.17.1/esm/41d36080838384136940763c99275350/","nicegui-codemirror":"/_nicegui/3.17.1/esm/9af12f3b665d3a8764a5e036d9536f40/index.js","nicegui-codemirror/":"/_nicegui/3.17.1/esm/9af12f3b665d3a8764a5e036d9536f40/","nicegui-echart":"/_nicegui/3.17.1/esm/2884f3f6f9062691f353771a2fe5b66d/index.js","nicegui-echart/":"/_nicegui/3.17.1/esm/2884f3f6f9062691f353771a2fe5b66d/","nicegui-joystick":"/_nicegui/3.17.1/esm/31344492dbedefcd97dc616300524c2b/index.js","nicegui-joystick/":"/_nicegui/3.17.1/esm/31344492dbedefcd97dc616300524c2b/","nicegui-json-editor":"/_nicegui/3.17.1/esm/e33e4cc6c7be8988e9708dcf00c62ead/index.js","nicegui-json-editor/":"/_nicegui/3.17.1/esm/e33e4cc6c7be8988e9708dcf00c62ead/","nicegui-leaflet":"/_nicegui/3.17.1/esm/ca6fb67b1b94da3dabb508bf8dbe677c/index.js","nicegui-leaflet/":"/_nicegui/3.17.1/esm/ca6fb67b1b94da3dabb508bf8dbe677c/","nicegui-mermaid":"/_nicegui/3.17.1/esm/1afac892b02be5fdb8868c028dfd6607/index.js","nicegui-mermaid/":"/_nicegui/3.17.1/esm/1afac892b02be5fdb8868c028dfd6607/","nicegui-plotly":"/_nicegui/3.17.1/esm/1b3ba860b4c521f0f1f21a29b413fa47/index.js","nicegui-plotly/":"/_nicegui/3.17.1/esm/1b3ba860b4c521f0f1f21a29b413fa47/","nicegui-scene":"/_nicegui/3.17.1/esm/a2756e6f3fa46e2a786a91e10bb99450/index.js","nicegui-scene/":"/_nicegui/3.17.1/esm/a2756e6f3fa46e2a786a91e10bb99450/","nicegui-sortable":"/_nicegui/3.17.1/esm/ce22a931bc32d7ac8cdb5a49685432d1/index.js","nicegui-sortable/":"/_nicegui/3.17.1/esm/ce22a931bc32d7ac8cdb5a49685432d1/","nicegui-xterm":"/_nicegui/3.17.1/esm/f89bfde55eabd336aa4ce3a0839999be/index.js","nicegui-xterm/":"/_nicegui/3.17.1/esm/f89bfde55eabd336aa4ce3a0839999be/"}}
+    </script>
+    <script>
+      addStyle = (c) => document.head.append(Object.assign(document.createElement("style"), { textContent: c }));
+    </script>
+    
+    <!-- prevent Prettier from removing this line -->
+    
+    <link rel="modulepreload" href="http://127.0.0.1:8080/_nicegui/3.17.1/static/vue.esm-browser.prod.js">
+    
+    <link rel="modulepreload" href="http://127.0.0.1:8080/_nicegui/3.17.1/components/2f192583031d92ca8f6edbdd4fe23d01/header.js">
+    
+    <link rel="modulepreload" href="http://127.0.0.1:8080/_nicegui/3.17.1/components/eb8ec46e76734b0535eb0539e6861986/select.js">
+    
+    <link rel="modulepreload" href="http://127.0.0.1:8080/_nicegui/3.17.1/components/4ce29add139d78b5982d4e9ada0373f7/code.js">
+    
+    <link rel="modulepreload" href="http://127.0.0.1:8080/_nicegui/3.17.1/components/01499782b7cc52cc634601dcc167acfa/markdown.js">
+    
+    <link rel="modulepreload" href="http://127.0.0.1:8080/_nicegui/3.17.1/components/eb069f45d9b40cfc3ea58a89b541c0c9/timer.js">
+    
+    <!-- prevent Prettier from removing this line -->
+    
+    <style type="text/tailwindcss">
+      @custom-variant dark (&:where(body.body--dark, body.body--dark *));
+    </style>
+    
+    <!-- prevent Prettier from removing this line -->
+    
+  <style>/*! tailwindcss v4.1.13 | MIT License | https://tailwindcss.com */
+@layer properties;
+@layer theme, base, components, utilities;
+@layer theme {
+  :root, :host {
+    --font-sans: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
+    --color-white: #fff;
+    --spacing: 0.25rem;
+    --container-3xl: 48rem;
+    --font-weight-bold: 700;
+    --default-font-family: var(--font-sans);
+    --default-mono-font-family: var(--font-mono);
+  }
+}
+@layer base {
+  *, ::after, ::before, ::backdrop, ::file-selector-button {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border: 0 solid;
+  }
+  html, :host {
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    tab-size: 4;
+    font-family: var(--default-font-family, ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji');
+    font-feature-settings: var(--default-font-feature-settings, normal);
+    font-variation-settings: var(--default-font-variation-settings, normal);
+    -webkit-tap-highlight-color: transparent;
+  }
+  hr {
+    height: 0;
+    color: inherit;
+    border-top-width: 1px;
+  }
+  abbr:where([title]) {
+    -webkit-text-decoration: underline dotted;
+    text-decoration: underline dotted;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+  a {
+    color: inherit;
+    -webkit-text-decoration: inherit;
+    text-decoration: inherit;
+  }
+  b, strong {
+    font-weight: bolder;
+  }
+  code, kbd, samp, pre {
+    font-family: var(--default-mono-font-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace);
+    font-feature-settings: var(--default-mono-font-feature-settings, normal);
+    font-variation-settings: var(--default-mono-font-variation-settings, normal);
+    font-size: 1em;
+  }
+  small {
+    font-size: 80%;
+  }
+  sub, sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+  }
+  sub {
+    bottom: -0.25em;
+  }
+  sup {
+    top: -0.5em;
+  }
+  table {
+    text-indent: 0;
+    border-color: inherit;
+    border-collapse: collapse;
+  }
+  :-moz-focusring {
+    outline: auto;
+  }
+  progress {
+    vertical-align: baseline;
+  }
+  summary {
+    display: list-item;
+  }
+  ol, ul, menu {
+    list-style: none;
+  }
+  img, svg, video, canvas, audio, iframe, embed, object {
+    display: block;
+    vertical-align: middle;
+  }
+  img, video {
+    max-width: 100%;
+    height: auto;
+  }
+  button, input, select, optgroup, textarea, ::file-selector-button {
+    font: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    border-radius: 0;
+    background-color: transparent;
+    opacity: 1;
+  }
+  :where(select:is([multiple], [size])) optgroup {
+    font-weight: bolder;
+  }
+  :where(select:is([multiple], [size])) optgroup option {
+    padding-inline-start: 20px;
+  }
+  ::file-selector-button {
+    margin-inline-end: 4px;
+  }
+  ::placeholder {
+    opacity: 1;
+  }
+  @supports (not (-webkit-appearance: -apple-pay-button))  or (contain-intrinsic-size: 1px) {
+    ::placeholder {
+      color: currentcolor;
+      @supports (color: color-mix(in lab, red, red)) {
+        color: color-mix(in oklab, currentcolor 50%, transparent);
+      }
+    }
+  }
+  textarea {
+    resize: vertical;
+  }
+  ::-webkit-search-decoration {
+    -webkit-appearance: none;
+  }
+  ::-webkit-date-and-time-value {
+    min-height: 1lh;
+    text-align: inherit;
+  }
+  ::-webkit-datetime-edit {
+    display: inline-flex;
+  }
+  ::-webkit-datetime-edit-fields-wrapper {
+    padding: 0;
+  }
+  ::-webkit-datetime-edit, ::-webkit-datetime-edit-year-field, ::-webkit-datetime-edit-month-field, ::-webkit-datetime-edit-day-field, ::-webkit-datetime-edit-hour-field, ::-webkit-datetime-edit-minute-field, ::-webkit-datetime-edit-second-field, ::-webkit-datetime-edit-millisecond-field, ::-webkit-datetime-edit-meridiem-field {
+    padding-block: 0;
+  }
+  ::-webkit-calendar-picker-indicator {
+    line-height: 1;
+  }
+  :-moz-ui-invalid {
+    box-shadow: none;
+  }
+  button, input:where([type='button'], [type='reset'], [type='submit']), ::file-selector-button {
+    appearance: button;
+  }
+  ::-webkit-inner-spin-button, ::-webkit-outer-spin-button {
+    height: auto;
+  }
+  [hidden]:where(:not([hidden='until-found'])) {
+    display: none !important;
+  }
+}
+@layer utilities {
+  .absolute {
+    position: absolute;
+  }
+  .fixed {
+    position: fixed;
+  }
+  .bottom-0 {
+    bottom: calc(var(--spacing) * 0);
+  }
+  .left-0 {
+    left: calc(var(--spacing) * 0);
+  }
+  .mx-auto {
+    margin-inline: auto;
+  }
+  .mt-4 {
+    margin-top: calc(var(--spacing) * 4);
+  }
+  .block {
+    display: block;
+  }
+  .w-64 {
+    width: calc(var(--spacing) * 64);
+  }
+  .w-full {
+    width: 100%;
+  }
+  .max-w-3xl {
+    max-width: var(--container-3xl);
+  }
+  .items-center {
+    align-items: center;
+  }
+  .items-end {
+    align-items: flex-end;
+  }
+  .items-start {
+    align-items: flex-start;
+  }
+  .justify-center {
+    justify-content: center;
+  }
+  .gap-2 {
+    gap: calc(var(--spacing) * 2);
+  }
+  .gap-4 {
+    gap: calc(var(--spacing) * 4);
+  }
+  .self-stretch {
+    align-self: stretch;
+  }
+  .bg-white {
+    background-color: var(--color-white);
+  }
+  .p-2 {
+    padding: calc(var(--spacing) * 2);
+  }
+  .p-4 {
+    padding: calc(var(--spacing) * 4);
+  }
+  .text-center {
+    text-align: center;
+  }
+  .font-bold {
+    --tw-font-weight: var(--font-weight-bold);
+    font-weight: var(--font-weight-bold);
+  }
+}
+@property --tw-font-weight {
+  syntax: "*";
+  inherits: false;
+}
+@layer properties {
+  @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
+    *, ::before, ::after, ::backdrop {
+      --tw-font-weight: initial;
+    }
+  }
+}
+</style><link rel="stylesheet" href="05-salary_files/codehilite_821444cf7f8b10160cbba208f6dd37d9_ORxm.css" data-codehilite_821444cf7f8b10160cbba208f6dd37d9-css=""></head>
+  <body style="--q-primary: #5898d4; --q-secondary: #26a69a; --q-accent: #9c27b0; --q-dark: #1d1d1d; --q-dark-page: #121212; --q-positive: #21ba45; --q-negative: #c10015; --q-info: #31ccec; --q-warning: #f2c037;" class="desktop no-touch body--light">
+    <script defer="defer" src="05-salary_files/socket.io.min_ORxm.js"></script>
+    
+    <script defer="defer" src="05-salary_files/tailwindcss.min_ORxm.js"></script>
+    
+    <script type="module">
+      import * as Vue from "vue";
+      globalThis.Vue = Vue;
+      document.getElementById("esm-fallback")?.remove();
+    </script>
+    
+    <script defer="defer" src="05-salary_files/quasar.umd.prod_ORxm.js"></script>
+    
+    <script defer="defer" src="05-salary_files/nicegui_ORxm.js"></script>
+
+    <script defer="defer" src="05-salary_files/en-US.umd.prod_ORxm.js"></script>
+    <style></style>
+
+
+
+    <style>
+      #esm-fallback {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        height: 100vh;
+        font-family: sans-serif;
+        color: #888;
+        opacity: 0;
+        animation: esm-fallback-reveal 0s 1s forwards;
+      }
+      @keyframes esm-fallback-reveal {
+        to {
+          opacity: 1;
+        }
+      }
+      #esm-fallback ~ * {
+        display: none;
+      }
+    </style>
+    
+    <div id="app" data-v-app=""><div class="q-layout q-layout--standard nicegui-layout" style="min-height: 919px;" tabindex="-1" id="c0"><!----><!----><header class="q-header q-layout__section--marginal fixed-top nicegui-header wrap bg-blue-9" id="c4" loopback="true"><div id="c5" class="text-h6 font-bold">💰 Калькулятор премии</div><!----></header><div class="q-page-container" style="padding-top: 64px;" id="c1"><main class="q-page" style="min-height: 855px;" id="c2"><div id="c3" class="nicegui-content"><div id="c6" class="nicegui-column p-4 w-full max-w-3xl mx-auto gap-4"><div id="c7" class="text-caption text-grey-7">Меняй оклад или грейд — премия пересчитается на лету.</div><div class="q-card nicegui-card w-full" id="c8"><label class="q-field row no-wrap items-start q-field--standard q-select q-field--auto-height q-select--without-input q-select--without-chips q-select--single q-field--float q-field--labeled w-64" for="f_dafd860d-e381-43f9-8fa0-6dfe32b57251"><!----><div class="q-field__inner relative-position col self-stretch"><div class="q-field__control relative-position row no-wrap" tabindex="-1"><div class="q-field__control-container col relative-position row no-wrap q-anchor--skip"><div class="q-field__label no-pointer-events absolute ellipsis">Сотрудник</div><div class="q-field__native row items-center" id="c9" loopback="true"><span class="ellipsis">Иванов И.И.</span><input class="q-select__focus-target" id="f_dafd860d-e381-43f9-8fa0-6dfe32b57251" readonly="readonly" tabindex="0" role="combobox" aria-label="Сотрудник" aria-readonly="false" aria-autocomplete="none" aria-expanded="false" aria-controls="f_dafd860d-e381-43f9-8fa0-6dfe32b57251_lb" value="Иванов И.И."></div></div><div class="q-field__append q-field__marginal row no-wrap items-center q-anchor--skip"><i class="q-icon notranslate material-icons q-select__dropdown-icon" aria-hidden="true">arrow_drop_down</i></div><!----></div><!----></div><!----></label><label class="q-field row no-wrap items-start q-field--standard q-input q-field--float q-field--labeled w-64" for="c10"><!----><div class="q-field__inner relative-position col self-stretch"><div class="q-field__control relative-position row no-wrap" tabindex="-1"><div class="q-field__control-container col relative-position row no-wrap q-anchor--skip"><div class="q-field__label no-pointer-events absolute ellipsis">Оклад, ₽</div><input class="q-field__native q-placeholder" tabindex="0" aria-label="Оклад, ₽" name="c10" id="c10" loopback="false" step="5000" type="number" value="90000"></div></div><!----></div><!----></label><label class="q-field row no-wrap items-start q-field--standard q-select q-field--auto-height q-select--without-input q-select--without-chips q-select--single q-field--float q-field--labeled w-64" for="f_daa64684-c514-423b-a0c0-3e8ac374f1c6"><!----><div class="q-field__inner relative-position col self-stretch"><div class="q-field__control relative-position row no-wrap" tabindex="-1"><div class="q-field__control-container col relative-position row no-wrap q-anchor--skip"><div class="q-field__label no-pointer-events absolute ellipsis">% премии по грейду</div><div class="q-field__native row items-center" id="c11" loopback="true"><span class="ellipsis">0.15</span><input class="q-select__focus-target" id="f_daa64684-c514-423b-a0c0-3e8ac374f1c6" readonly="readonly" tabindex="0" role="combobox" aria-label="% премии по грейду" aria-readonly="false" aria-autocomplete="none" aria-expanded="false" aria-controls="f_daa64684-c514-423b-a0c0-3e8ac374f1c6_lb" value="0.15"></div></div><div class="q-field__append q-field__marginal row no-wrap items-center q-anchor--skip"><i class="q-icon notranslate material-icons q-select__dropdown-icon" aria-hidden="true">arrow_drop_down</i></div><!----></div><!----></div><!----></label><label class="q-field row no-wrap items-start q-field--standard q-select q-field--auto-height q-select--without-input q-select--without-chips q-select--single q-field--float q-field--labeled w-64" for="f_5828e362-fcb5-4d0b-8ff3-ef83c4964f8e"><!----><div class="q-field__inner relative-position col self-stretch"><div class="q-field__control relative-position row no-wrap" tabindex="-1"><div class="q-field__control-container col relative-position row no-wrap q-anchor--skip"><div class="q-field__label no-pointer-events absolute ellipsis">Коэф. оценки</div><div class="q-field__native row items-center" id="c12" loopback="true"><span class="ellipsis">1.2</span><input class="q-select__focus-target" id="f_5828e362-fcb5-4d0b-8ff3-ef83c4964f8e" readonly="readonly" tabindex="0" role="combobox" aria-label="Коэф. оценки" aria-readonly="false" aria-autocomplete="none" aria-expanded="false" aria-controls="f_5828e362-fcb5-4d0b-8ff3-ef83c4964f8e_lb" value="1.2"></div></div><div class="q-field__append q-field__marginal row no-wrap items-center q-anchor--skip"><i class="q-icon notranslate material-icons q-select__dropdown-icon" aria-hidden="true">arrow_drop_down</i></div><!----></div><!----></div><!----></label><div id="c13" class="text-h4 font-bold text-green-8 mt-4">Премия: 16 200 ₽</div><div id="c14" class="nicegui-code"><div id="c15" class="nicegui-markdown" style="overflow: auto; height: 100%;"><div class="codehilite">
+<pre><span></span><code><span class="n">ПРЕМИЯ</span> <span class="o">=</span> <span class="n">оклад</span> <span class="err">×</span> <span class="o">%</span><span class="n">премии</span><span class="p">(</span><span class="n">грейд</span><span class="p">)</span> <span class="err">×</span> <span class="n">коэффициент</span><span class="p">(</span><span class="n">оценка</span><span class="p">)</span>
+</code></pre>
+</div>
+</div><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--round text-primary q-btn--actionable q-focusable q-hoverable nicegui-code-copy" style="font-size: 10px;" tabindex="0" type="button" id="c16"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><i class="q-icon notranslate material-icons" aria-hidden="true" role="img">content_copy</i></span></button><!----></div></div></div><div id="c18" class="nicegui-row row fixed bottom-0 left-0 w-full bg-white shadow-2 justify-center gap-2 p-2"><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c19"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">📊 Дашборд</span></span></button><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c20"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">👥 Команда</span></span></button><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c21"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">🎯 Оценки</span></span></button><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c22"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">🏁 Цели</span></span></button><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c23"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">💰 Премия</span></span></button><button class="q-btn q-btn-item non-selectable no-outline q-btn--flat q-btn--rectangle text-primary q-btn--actionable q-focusable q-hoverable" tabindex="0" type="button" id="c24"><span class="q-focus-helper"></span><span class="q-btn__content text-center col items-center q-anchor--skip justify-center row"><span class="block">📥 Экспорт</span></span></button></div></div></main></div></div></div>
+    <div id="nicegui-keep-alive-cache" style="display: none" aria-hidden="true"></div>
+    <div id="popup" class="nicegui-error-popup" aria-hidden="true">
+      <span>Connection lost.</span>
+      <span>Trying to reconnect...</span>
+    </div>
+    <div id="too_long_message_popup" class="nicegui-error-popup" aria-hidden="true">
+      <span>Message too long</span>
+      <span>The message is too large for WebSocket transmission.</span>
+    </div>
+    <script type="module">
+      // Load DOMPurify for HTML sanitization
+      // NOTE: Always use DOMPurify instead of native setHTML because native setHTML strips class attributes.
+      import DOMPurify from "dompurify";
+      Element.prototype.setHTML = function (html) {
+        this.innerHTML = DOMPurify.sanitize(html);
+      };
+
+      const app = createApp(parseElements(String.raw`{"0":{"tag":"q-layout","class":["nicegui-layout"],"props":{"view":"hHh lpr fff"},"children":[4,1],"events":[{"listener_id":"57726cfa-b390-4ae2-be3b-fd170efc1a2e","type":"sub_pages_open","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"7eedf6fa-fcfd-41fe-8439-f147195ade18","type":"sub_pages_navigate","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"1":{"tag":"q-page-container","children":[2]},"2":{"tag":"q-page","children":[3]},"3":{"tag":"div","class":["nicegui-content"],"children":[6,18]},"4":{"tag":"nicegui-header","class":["nicegui-header","wrap","bg-blue-9"],"props":{"model-value":true,"loopback":true,"bordered":false,"elevated":false,"add-scroll-padding":true},"children":[5],"events":[{"listener_id":"613aecfb-8599-4bef-abfc-efdb803da6bd","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"5":{"tag":"div","text":"💰 Калькулятор премии","class":["text-h6","font-bold"]},"6":{"tag":"div","class":["nicegui-column","p-4","w-full","max-w-3xl","mx-auto","gap-4"],"children":[7,8]},"7":{"tag":"div","text":"Меняй оклад или грейд — премия пересчитается на лету.","class":["text-caption","text-grey-7"]},"8":{"tag":"q-card","class":["nicegui-card","w-full"],"children":[9,10,11,12,13,14]},"9":{"tag":"nicegui-select","class":["w-64"],"props":{"model-value":{"value":0,"label":"Иванов И.И."},"loopback":true,"options":[{"value":0,"label":"Иванов И.И."},{"value":1,"label":"Петров П.П."},{"value":2,"label":"Сидоров С.С."},{"value":3,"label":"Смирнова А.А."}],"error":null,"label":"Сотрудник"},"events":[{"listener_id":"41fd3f81-f940-41a8-a078-259869715609","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"9f67e2a5-6a59-425d-baaa-13bc05a11404","type":"popupShow","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"a5132593-5c38-449d-bad6-5598397cfe2a","type":"popupHide","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"10":{"tag":"q-input","class":["w-64"],"props":{"model-value":"90000","loopback":false,"error":null,"label":"Оклад, ₽","for":"c10","type":"number","step":5000},"events":[{"listener_id":"25ba8231-b2f4-4eb5-a60c-a6103dd00c31","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"4dec9fab-b852-4a54-ae72-adba538d36d4","type":"blur","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"11":{"tag":"nicegui-select","class":["w-64"],"props":{"model-value":{"value":2,"label":0.15},"loopback":true,"options":[{"value":0,"label":0.0},{"value":1,"label":0.1},{"value":2,"label":0.15},{"value":3,"label":0.2},{"value":4,"label":0.25},{"value":5,"label":0.3}],"error":null,"label":"% премии по грейду"},"events":[{"listener_id":"e249f2a9-6d26-4660-a7f6-d31681e50385","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"7e7819ef-aa88-44fb-9af0-c7c6b7cb7c1b","type":"popupShow","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"622e78a2-57b1-4c37-8bfe-a454b7a1bd69","type":"popupHide","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"12":{"tag":"nicegui-select","class":["w-64"],"props":{"model-value":{"value":0,"label":1.2},"loopback":true,"options":[{"value":0,"label":1.2},{"value":1,"label":1.0},{"value":2,"label":0.6},{"value":3,"label":0.0},{"value":4,"label":0.0}],"error":null,"label":"Коэф. оценки"},"events":[{"listener_id":"c39c1cee-f4cd-47aa-a5e5-1e7f37fdb894","type":"update:modelValue","specials":[],"modifiers":[],"keys":[],"args":[null],"throttle":0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"52b8408c-4518-4404-a2f5-0b1dd728e7bd","type":"popupShow","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"1b9bdc82-b81c-44ea-8753-38180f2808b9","type":"popupHide","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"13":{"tag":"div","text":"Премия: 16 200 ₽","class":["text-h4","font-bold","text-green-8","mt-4"]},"14":{"tag":"nicegui-code","class":["nicegui-code"],"props":{"content":"ПРЕМИЯ = оклад × %премии(грейд) × коэффициент(оценка)"},"children":[15,16,17]},"15":{"tag":"nicegui-markdown","class":["nicegui-markdown"],"style":{"overflow":"auto","height":"100%"},"props":{"innerHTML":"&lt;div class=\"codehilite\"&gt;\n&lt;pre&gt;&lt;span&gt;&lt;/span&gt;&lt;code&gt;&lt;span class=\"n\"&gt;ПРЕМИЯ&lt;/span&gt; &lt;span class=\"o\"&gt;=&lt;/span&gt; &lt;span class=\"n\"&gt;оклад&lt;/span&gt; &lt;span class=\"err\"&gt;×&lt;/span&gt; &lt;span class=\"o\"&gt;%&lt;/span&gt;&lt;span class=\"n\"&gt;премии&lt;/span&gt;&lt;span class=\"p\"&gt;(&lt;/span&gt;&lt;span class=\"n\"&gt;грейд&lt;/span&gt;&lt;span class=\"p\"&gt;)&lt;/span&gt; &lt;span class=\"err\"&gt;×&lt;/span&gt; &lt;span class=\"n\"&gt;коэффициент&lt;/span&gt;&lt;span class=\"p\"&gt;(&lt;/span&gt;&lt;span class=\"n\"&gt;оценка&lt;/span&gt;&lt;span class=\"p\"&gt;)&lt;/span&gt;\n&lt;/code&gt;&lt;/pre&gt;\n&lt;/div&gt;\n","sanitize":true,"resource-name":"codehilite_821444cf7f8b10160cbba208f6dd37d9.css","dynamic-resource-path":"/_nicegui/3.17.1/dynamic_resources"},"events":[{"listener_id":"631de1b5-c8dc-4bc0-bf8e-eedbe2f4d9d3","type":"scroll","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"16":{"tag":"q-btn","class":["nicegui-code-copy"],"props":{"color":"primary","label":"","icon":"content_copy","round":true,"flat":true,"size":"sm"},"events":[{"listener_id":"7ce354ad-f5a5-4848-8a28-018613309acc","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null},{"listener_id":"4e21a1c8-cd4d-4047-844a-a15b19dccb20","type":"click","specials":[],"modifiers":[],"keys":[],"args":null,"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":"() =&gt; navigator.clipboard.writeText(getElement(\"14\").content)"}]},"17":{"tag":"nicegui-timer"},"18":{"tag":"div","class":["nicegui-row","row","fixed","bottom-0","left-0","w-full","bg-white","shadow-2","justify-center","gap-2","p-2"],"children":[19,20,21,22,23,24]},"19":{"tag":"q-btn","props":{"color":"primary","label":"📊 Дашборд","flat":true},"events":[{"listener_id":"fecbbd3d-9538-4880-bd37-db6521adbade","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"20":{"tag":"q-btn","props":{"color":"primary","label":"👥 Команда","flat":true},"events":[{"listener_id":"380e5724-b450-4ac2-8f7b-f1ae592e2d24","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"21":{"tag":"q-btn","props":{"color":"primary","label":"🎯 Оценки","flat":true},"events":[{"listener_id":"4c73c898-c73c-47d1-af73-e47e210b3506","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"22":{"tag":"q-btn","props":{"color":"primary","label":"🏁 Цели","flat":true},"events":[{"listener_id":"0f13477c-48f1-4c61-83fd-2075dc6bb296","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"23":{"tag":"q-btn","props":{"color":"primary","label":"💰 Премия","flat":true},"events":[{"listener_id":"9c63a07d-1048-4929-836f-2a99a31a6b19","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]},"24":{"tag":"q-btn","props":{"color":"primary","label":"📥 Экспорт","flat":true},"events":[{"listener_id":"02fe7e44-9ae2-4453-b6e7-4be3b8b0100d","type":"click","specials":[],"modifiers":[],"keys":[],"args":[],"throttle":0.0,"leading_events":true,"trailing_events":true,"js_handler":null}]}}`), {
+        version: "3.17.1",
+        prefix: "",
+        query: {'client_id': 'd0c2c48b-202f-4197-8c23-108b99d0879d', 'next_message_id': 0, 'implicit_handshake': True},
+        extraHeaders: {},
+        transports: ['websocket', 'polling'],
+      });
+      const dark = False;
+      const language = "en-US";
+      const vue_config = {"brand":{"primary":"#5898d4","secondary":"#26a69a","accent":"#9c27b0","dark":"#1d1d1d","dark-page":"#121212","positive":"#21ba45","negative":"#c10015","info":"#31ccec","warning":"#f2c037"},"loadingBar":{"color":"primary","skipHijack":false},"lang":{"noHtmlAttrs":true}};
+      
+        app.use(Quasar, {config: vue_config});
+        applyColors(vue_config.brand);
+        Quasar.lang.set(Quasar.lang[language.replace('-', '')]);
+        darkSetter = (dark) => Quasar.Dark.set(dark === None ? "auto" : dark);
+        setDark(dark);
+    
+
+      import { default as header } from "/_nicegui/3.17.1/components/2f192583031d92ca8f6edbdd4fe23d01/header.js";
+app.component("nicegui-header", header);
+import { default as select } from "/_nicegui/3.17.1/components/eb8ec46e76734b0535eb0539e6861986/select.js";
+app.component("nicegui-select", select);
+import { default as code } from "/_nicegui/3.17.1/components/4ce29add139d78b5982d4e9ada0373f7/code.js";
+app.component("nicegui-code", code);
+import { default as markdown } from "/_nicegui/3.17.1/components/01499782b7cc52cc634601dcc167acfa/markdown.js";
+app.component("nicegui-markdown", markdown);
+import { default as timer } from "/_nicegui/3.17.1/components/eb069f45d9b40cfc3ea58a89b541c0c9/timer.js";
+app.component("nicegui-timer", timer);
+      
+
+      app.mount("#app");
+
+      // Scroll to fragment after Vue mounts (browser's native scroll may have failed if element wasn't ready)
+      if (window.location.hash) {
+        Vue.nextTick(() => {
+          const fragment = window.location.hash.substring(1);
+          (document.getElementById(fragment) || document.querySelector(`a[name="${fragment}"]`))?.scrollIntoView();
+        });
+      }
+    </script>
+  
+<div id="q-loading-bar" data-v-app=""><div class="q-loading-bar q-loading-bar--top bg-primary" style="transform: translate3d(-100%, -200%, 0px); height: 2px; opacity: 0;" aria-hidden="true"></div></div><div id="q-notify" data-v-app=""><div class="q-notifications"><div class="q-notifications__list q-notifications__list--top fixed column no-wrap items-start"></div><div class="q-notifications__list q-notifications__list--top fixed column no-wrap items-end"></div><div class="q-notifications__list q-notifications__list--bottom fixed column no-wrap items-start"></div><div class="q-notifications__list q-notifications__list--bottom fixed column no-wrap items-end"></div><div class="q-notifications__list q-notifications__list--top fixed column no-wrap items-center"></div><div class="q-notifications__list q-notifications__list--bottom fixed column no-wrap items-center"></div><div class="q-notifications__list q-notifications__list--center fixed column no-wrap items-start justify-center"></div><div class="q-notifications__list q-notifications__list--center fixed column no-wrap items-end justify-center"></div><div class="q-notifications__list q-notifications__list--center fixed column no-wrap flex-center"></div></div></div></body></html>
