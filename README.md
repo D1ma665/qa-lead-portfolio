@@ -7,6 +7,12 @@
 
 💬 Telegram: [@GrafZavadskiy](https://t.me/GrafZavadskiy) · 💻 GitHub: [D1ma665](https://github.com/D1ma665)
 
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-brightgreen?style=for-the-badge)](https://qa-grading-app.onrender.com)
+
+**👉 [Открыть интерактивное демо](https://qa-grading-app.onrender.com)**
+
+> ⚠️ Демо на бесплатном тарифе: первый заход ~30–50 сек (инстанс просыпается).
+
 ---
 
 ## Навигация
