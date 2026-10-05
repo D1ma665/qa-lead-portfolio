@@ -1,2 +1,18 @@
+# System / editor
 .DS_Store
+*.save
+*.swp
+*~
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Env
+.env
+
+# Deploy copy
+app/qa-app-deploy/.DS_Store
 *.tmp
