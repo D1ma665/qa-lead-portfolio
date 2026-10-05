@@ -14,5 +14,5 @@ venv/
 .env
 
 # Deploy copy
-app/qa-app-deploy/.DS_Store
+app/qa-app-deploy/
 *.tmp
