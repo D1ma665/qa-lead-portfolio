@@ -260,32 +260,51 @@ def page_matrix(data, emp_name=None):
     return page("Оценки", body, "matrix")
 
 
-def page_goals():
-    cards = ""
-    for g, d in config.GOALS.items():
-        comps = [c for c in config.COMPS if c[3] == g]
-        chips = "".join(
-            '<div style="padding:4px 0"><span class="prio' + str(p) + '">п' + str(p)
-            + "</span> " + e(n) + ' <span class="muted">· ' + e(cat) + "</span></div>"
-            for n, cat, p, _ in comps
-        )
-        metrics = "".join("<li>" + e(m) + "</li>" for m in d["metrics"])
-        cards += (
-            '<div class="card"><h3 style="margin-top:0">' + e(g) + " — " + e(d["name"]) + "</h3>"
-            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">'
-            '<div><b class="muted">Ключевые компетенции (' + str(len(comps)) + ")</b>"
-            + chips + "</div>"
-            '<div><b class="muted">Метрики (Этап 2)</b><ul class="muted">' + metrics
-            + "</ul></div></div></div>"
-        )
-    body = (
-        "<h2>Цели</h2>"
-        '<p class="muted">Цель задаёт, на что работает группа компетенций. '
-        "Грейд считается по компетенциям; расчёт выполнения целей и оценка A–E — Этап 2.</p>"
-        + cards
-    )
-    return page("Цели", body, "goals")
+def page_goals(data=None, grade=None):
+    """Цели: шаблон по грейду (чтение)."""
+    tmpl = (data or {}).get("goals_template", {}) or {}
+    grades = [g[0] for g in config.GRADES]
+    names = {g[0]: g[1] for g in config.GRADES}
+    grade = grade if grade in grades else (grades[0] if grades else None)
+    goals = tmpl.get(grade, []) or []
 
+    tabs = "".join(
+        '<a href="/goals?grade=%s" style="display:inline-block;margin-right:14px;'
+        'padding:6px 10px;border-radius:6px;text-decoration:none;'
+        'background:%s;color:%s">%s</a>' % (
+            g, "#2563eb" if g == grade else "transparent",
+            "#ffffff" if g == grade else "#cccccc",
+            e(names.get(g, g)))
+        for g in grades)
+
+    cards = ""
+    for gz in goals:
+        crit = "".join(
+            '<div style="padding:4px 0">%s %s</div>' % (
+                "●" if c.get("critical") else "○", e(c.get("text", "")))
+            for c in gz.get("criteria", []))
+        lvl = "выше грейда" if gz.get("level") == "above" else "свой"
+        cards += (
+            '<div class="card">'
+            '<b>%s</b> <span class="muted">· %s · уровень: %s</span>'
+            '<div class="muted">%s</div>'
+            '<div style="margin-top:8px"><b>Критерии:</b></div>%s'
+            '</div>' % (
+                e(gz.get("name", "")),
+                "стандартная" if gz.get("type") == "standard" else "доп. задача",
+                lvl, e(gz.get("id", "")), crit))
+
+    if not cards:
+        cards = '<div class="card muted">У этого грейда целей пока нет.</div>'
+
+    body = (
+        '<h2>Цели</h2>'
+        '<p class="muted">Шаблон стандартных целей по грейдам. '
+        'По целям считается оценка A–E за квартал.</p>'
+        '<div style="margin:12px 0">' + tabs + '</div>'
+        + cards)
+
+    return page("Цели", body, "goals")
 
 def page_projects(data, msg=""):
     emps = [x["name"] for x in data["employees"]]
@@ -365,7 +384,7 @@ class H(BaseHTTPRequestHandler):
             if p == "/matrix":
                 return self._send(page_matrix(data, qq.get("emp", [None])[0]))
             if p == "/goals":
-                return self._send(page_goals())
+                return self._send(page_goals(data, qq.get("grade", [None])[0]))
             if p == "/projects":
                 return self._send(page_projects(data, qq.get("msg", [""])[0]))
 
