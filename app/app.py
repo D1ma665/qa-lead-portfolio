@@ -169,9 +169,11 @@ def page_comps(data=None):
     rows = ""
     for c in comps:
         name, cat, prio = c[0], c[1], c[2]
+        code = c[3] if len(c) > 3 and c[3] else ""
+        cat_full = (cat + (" / " + code if code else "")) if cat else code
         cls = "risk" if prio == 1 else ""
         rows += ('<tr><td>%s</td><td class="muted">%s</td>'
-                 '<td><b class="%s">%s</b></td></tr>' % (e(name), e(cat), cls, prio))
+                 '<td><b class="%s">%s</b></td></tr>' % (e(name), e(cat_full), cls, prio))
     body = (
         '<h2>Компетенции</h2>'
         '<p class="muted">Всего: %d. Приоритет 1 — планка 3 балла, '
