@@ -177,6 +177,7 @@ def page_comp_form(data=None, comp=None):
     body = (
         '<h2>%s</h2>'
         '<div class="card"><form method="get" action="/comps/save">'
+        '<input type="hidden" name="name_old" value="%s">'
         '<label>Название: <input name="name" value="%s" required></label><br>'
         '<label>Группа: <input name="cat" value="%s"></label><br>'
         '<label>Код (Ц1, Ц2...): <input name="code" value="%s"></label><br>'
@@ -185,7 +186,7 @@ def page_comp_form(data=None, comp=None):
         '<a class="btn" href="/comps">Отмена</a>'
         '</form></div>' % (
             "Правка компетенции" if comp else "Новая компетенция",
-            e(name), e(cat), e(code), opts))
+            e(name), e(name), e(cat), e(code), opts))
     return page("Компетенции", body, "comps")
 
 
@@ -481,12 +482,22 @@ class H(BaseHTTPRequestHandler):
                 code = (qq.get("code", [""])[0] or "").strip()
                 ph = qq.get("prio", ["1"])[0]
                 prio = int(ph) if ph in ("1", "2", "3") else 1
+                old = (qq.get("name_old", [""])[0] or "").strip()
                 comps = data.setdefault("competencies", [])
                 if not name:
                     return self._send(page_comp_form(data))
-                if any(c[0] == name for c in comps):
+                if any(c[0] == name and c[0] != old for c in comps):
                     return self._send(page_comp_form(data))
-                comps.append([name, cat, prio, code])
+                cur = next((c for c in comps if c[0] == old), None) if old else None
+                if cur is not None:
+                    if old != name:
+                        for emp in data.get("employees", []):
+                            sc = emp.get("scores") or {}
+                            if old in sc:
+                                sc[name] = sc.pop(old)
+                    cur[0], cur[1], cur[2], cur[3] = name, cat, prio, code
+                else:
+                    comps.append([name, cat, prio, code])
                 st.save(data)
                 return self._redirect("/comps")
 
