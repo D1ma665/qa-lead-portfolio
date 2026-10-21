@@ -5,3 +5,5 @@ patch*.py
 *.broken
 *.broken2
 *.bak
+*.old*
+app.py.broken*
