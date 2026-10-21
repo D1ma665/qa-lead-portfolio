@@ -1,18 +1,7 @@
-# System / editor
-.DS_Store
-*.save
-*.swp
-*~
-
-# Python
 __pycache__/
 *.pyc
+*.bak
+*.broken
 .venv/
-venv/
-
-# Env
-.env
-
-# Deploy copy
-app/qa-app-deploy/
-*.tmp
+state.json
+QA_System.xlsx
