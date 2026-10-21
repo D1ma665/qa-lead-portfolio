@@ -163,6 +163,24 @@ def page_dashboard(data):
     return page("Дашборд", body, "dashboard")
 
 
+def page_comps(data=None):
+    """Справочник компетенций (чтение)."""
+    comps = (data or {}).get("competencies") or list(config.COMPS)
+    rows = ""
+    for c in comps:
+        name, cat, prio = c[0], c[1], c[2]
+        cls = "risk" if prio == 1 else ""
+        rows += ('<tr><td>%s</td><td class="muted">%s</td>'
+                 '<td><b class="%s">%s</b></td></tr>' % (e(name), e(cat), cls, prio))
+    body = (
+        '<h2>Компетенции</h2>'
+        '<p class="muted">Всего: %d. Приоритет 1 — планка 3 балла, '
+        'приоритет 2 — 2 балла, приоритет 3 не анализируется.</p>'
+        '<table class="tbl"><tr><th>Компетенция</th><th>Группа</th>'
+        '<th>Приоритет</th></tr>%s</table>' % (len(comps), rows))
+    return page("Компетенции", body, "comps")
+
+
 def page_team(data):
     grade_names = dict((g[0], g[1]) for g in config.GRADES)
     rows = ""
@@ -383,6 +401,8 @@ class H(BaseHTTPRequestHandler):
                 return self._send(page_team(data))
             if p == "/matrix":
                 return self._send(page_matrix(data, qq.get("emp", [None])[0]))
+            if p == "/comps":
+                return self._send(page_comps(data))
             if p == "/goals":
                 return self._send(page_goals(data, qq.get("grade", [None])[0]))
             if p == "/projects":
