@@ -15,6 +15,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import parse_qs, urlparse, quote
 import html
 import traceback
+import urllib.parse
 
 import config
 import grading
@@ -197,8 +198,12 @@ def page_comps(data=None):
         code = c[3] if len(c) > 3 and c[3] else ""
         cat_full = (cat + (" / " + code if code else "")) if cat else code
         cls = "risk" if prio == 1 else ""
+        q = urllib.parse.quote(name)
         rows += ('<tr><td>%s</td><td class="muted">%s</td>'
-                 '<td><b class="%s">%s</b></td></tr>' % (e(name), e(cat_full), cls, prio))
+                 '<td><b class="%s">%s</b></td>'
+                 '<td><a href="/comps/edit?name=%s">✎</a> '
+                 '<a href="/comps/del?name=%s" onclick="return confirm(\'Удалить?\')">✕</a>'
+                 '</td></tr>' % (e(name), e(cat_full), cls, prio, q, q))
     body = (
         '<h2>Компетенции</h2>'
         '<p class="muted">Всего: %d. Приоритет 1 — планка 3 балла, '
@@ -456,6 +461,20 @@ class H(BaseHTTPRequestHandler):
 
             if p == "/comps":
                 return self._send(page_comps(data))
+            if p == "/comps/edit":
+                nm = qq.get("name", [""])[0]
+                comps = data.get("competencies") or []
+                cur = next((c for c in comps if c[0] == nm), None)
+                if cur is None:
+                    return self._redirect("/comps")
+                return self._send(page_comp_form(data, cur))
+            if p == "/comps/del":
+                nm = qq.get("name", [""])[0]
+                comps = data.get("competencies") or []
+                data["competencies"] = [c for c in comps if c[0] != nm]
+                st.save(data)
+                return self._redirect("/comps")
+
             if p == "/comps/save":
                 name = (qq.get("name", [""])[0] or "").strip()
                 cat = (qq.get("cat", [""])[0] or "").strip()
