@@ -456,6 +456,21 @@ class H(BaseHTTPRequestHandler):
 
             if p == "/comps":
                 return self._send(page_comps(data))
+            if p == "/comps/save":
+                name = (qq.get("name", [""])[0] or "").strip()
+                cat = (qq.get("cat", [""])[0] or "").strip()
+                code = (qq.get("code", [""])[0] or "").strip()
+                ph = qq.get("prio", ["1"])[0]
+                prio = int(ph) if ph in ("1", "2", "3") else 1
+                comps = data.setdefault("competencies", [])
+                if not name:
+                    return self._send(page_comp_form(data))
+                if any(c[0] == name for c in comps):
+                    return self._send(page_comp_form(data))
+                comps.append([name, cat, prio, code])
+                st.save(data)
+                return self._redirect("/comps")
+
             if p == "/comps/add":
                 return self._send(page_comp_form(data))
 
