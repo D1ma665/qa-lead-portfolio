@@ -1,286 +1,404 @@
-from nicegui import ui
-import pandas as pd
+"""
+app.py — веб-интерфейс системы оценки QA (Этап 1)
 
-from config import APP_NAME, VERSION, COMPS, GRADES, PPL, MARK_K, MARK_LABEL
-from grading import build_results, comp_pct
-from export_excel import export
-from state import STATE, save
+Запуск:  python app.py   →   http://127.0.0.1:8080
+
+Исправления в этой версии:
+  * убран вложенный f-string с тройными кавычками (SyntaxError на Python 3.12);
+  * редиректы с кириллицей больше не роняют сервер (UnicodeEncodeError latin-1);
+  * параметры URL кодируются через quote();
+  * ошибка обработчика показывается в браузере, сервер продолжает работать.
+"""
+
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import parse_qs, urlparse, quote
+import html
+import traceback
+
+import config
+import grading
+import state as st
+
+HOST, PORT = "127.0.0.1", 8080
+
+CSS = """
+:root{--bg:#0f1216;--card:#171c22;--line:#262d36;--txt:#e6edf3;--muted:#8b98a5;
+--acc:#3b82f6;--ok:#22c55e;--warn:#f59e0b;--risk:#ef4444}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+background:var(--bg);color:var(--txt)}
+header{padding:16px 24px;border-bottom:1px solid var(--line);display:flex;
+gap:8px;align-items:center;flex-wrap:wrap;background:var(--card)}
+h1{font-size:16px;margin:0 24px 0 0;white-space:nowrap}
+nav a{color:var(--muted);text-decoration:none;padding:6px 12px;border-radius:6px}
+nav a:hover{background:#222a33;color:var(--txt)}
+nav a.on{background:var(--acc);color:#fff}
+main{padding:24px;max-width:1400px}
+h2{font-size:18px;margin:0 0 16px}
+h3{font-size:14px;margin:24px 0 10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:500;font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+tr:hover td{background:#1b2229}
+input,select{background:#0f1216;border:1px solid var(--line);color:var(--txt);
+border-radius:6px;padding:5px 8px;font:inherit}
+button{background:var(--acc);border:0;color:#fff;padding:6px 14px;border-radius:6px;
+font:inherit;cursor:pointer}
+button.ghost{background:#222a33}
+button.ghost.on{background:var(--acc)}
+button.del{background:var(--risk)}
+.badge{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px}
+.ok{background:rgba(34,197,94,.15);color:var(--ok)}
+.warn{background:rgba(245,158,11,.15);color:var(--warn)}
+.risk{background:rgba(239,68,68,.15);color:var(--risk)}
+.muted{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
+.kpi b{display:block;font-size:24px;margin-top:4px}
+.wrap{overflow-x:auto}
+.prio1{color:#93c5fd}.prio2{color:#a7f3d0}.prio3{color:#fcd34d}
+.scores a{text-decoration:none}
+pre{background:#0f1216;border:1px solid var(--line);border-radius:8px;padding:12px;
+overflow:auto;font-size:12px;color:#fca5a5}
+"""
+
+TABS = [("dashboard", "Дашборд"), ("team", "Команда"), ("matrix", "Оценки"),
+        ("goals", "Цели"), ("projects", "Проекты")]
 
 
-def results_df():
-    return pd.DataFrame(build_results(
-        people=PPL,
-        history=STATE['history'],
-        bases=STATE['bases'],
-        goals=STATE['goals'],
-        scores=STATE['scores'],
-    ))
+def nav_html(active):
+    parts = []
+    for key, title in TABS:
+        cls = "on" if key == active else ""
+        parts.append('<a href="/' + key + '" class="' + cls + '">' + title + "</a>")
+    return "".join(parts)
 
 
-def fmt_rub(x):
-    return format(int(round(x)), ',').replace(',', chr(32))
-
-def nav():
-    with ui.row().classes('fixed bottom-0 left-0 w-full bg-white shadow-2 justify-center gap-2 p-2'):
-        ui.button('Дашборд', on_click=lambda: ui.navigate.to('/')).props('flat')
-        ui.button('Команда', on_click=lambda: ui.navigate.to('/team')).props('flat')
-        ui.button('Оценки', on_click=lambda: ui.navigate.to('/scores')).props('flat')
-        ui.button('Цели', on_click=lambda: ui.navigate.to('/goals')).props('flat')
-        ui.button('Премия', on_click=lambda: ui.navigate.to('/salary')).props('flat')
-        ui.button('Экспорт', on_click=lambda: ui.navigate.to('/export')).props('flat')
+def page(title, body, active=""):
+    return (
+        '<!doctype html><html lang="ru"><head><meta charset="utf-8">'
+        "<title>" + html.escape(title) + "</title><style>" + CSS + "</style></head><body>"
+        "<header><h1>QA · оценка и грейды</h1><nav>" + nav_html(active) + "</nav></header>"
+        "<main>" + body + "</main></body></html>"
+    )
 
 
-def header(title, subtitle=None):
-    with ui.header().classes('bg-blue-9'):
-        ui.label(title).classes('text-h6 font-bold')
-        if subtitle:
-            ui.label(subtitle).classes('text-caption opacity-70 ml-2')
+def q(s):
+    """Кодирование параметра для URL (кириллица)."""
+    return quote(str(s), safe="")
 
 
-def metric_card(caption, value, color='text-blue-9'):
-    with ui.card().classes('w-56'):
-        ui.label(caption).classes('text-caption text-grey-7')
-        ui.label(value).classes('text-h4 font-bold ' + color)
+def e(s):
+    """Экранирование для HTML."""
+    return html.escape("" if s is None else str(s))
 
 
-@ui.page('/')
-def page_dashboard():
-    header(APP_NAME, VERSION)
-    df = results_df()
+# ------------------------------------------------------------------ страницы
 
-    with ui.column().classes('p-4 w-full max-w-6xl mx-auto gap-4 pb-20'):
-        ui.label('ГРЕЙД <- компетенции | ОЦЕНКА <- цели | ПРЕМИЯ = оклад x %грейд x коэф').classes('text-caption text-grey-7')
+def page_dashboard(data):
+    emps = data["employees"]
+    grades = {}
+    for emp in emps:
+        code, name = grading.grade_of(emp)
+        grades[name] = grades.get(name, 0) + 1
 
-        with ui.row().classes('gap-4'):
-            metric_card('Средний % компетенций', format(df['% компетенций'].mean(), '.1f'))
-            metric_card('Фонд премий, руб.', fmt_rub(df['Премия'].sum()), 'text-green-8')
-            metric_card('Сотрудников', str(len(df)), 'text-black')
+    cov = grading.coverage(emps)
+    risk = [r for r in cov if r["status"] == "risk"]
+    projects = st.project_coverage(data)
+    proj_risk = [p for p in projects if p["status"] == "risk"]
 
-        ui.label('Команда').classes('text-h6 mt-2')
-        show_cols = ['Сотрудник', '% компетенций', 'Грейд', 'Оценка', 'Премия', 'Статус']
-        ui.table.from_pandas(df[show_cols], row_key='Сотрудник').classes('w-full')
+    cards = "".join(
+        '<div class="kpi"><span class="muted">' + str(k) + "</span><b>" + str(v) + "</b></div>"
+        for k, v in [
+            ("Сотрудников", len(emps)),
+            ("Компетенций", len(config.COMPS)),
+            ("Проблем в покрытии", len(risk)),
+            ("Проектов под риском", len(proj_risk)),
+        ]
+    )
 
-        with ui.row().classes('gap-4 w-full'):
-            with ui.card().classes('flex-1'):
-                ui.label('Распределение по грейдам').classes('text-subtitle1')
-                dist = df['Грейд'].value_counts().rename_axis('Грейд').reset_index(name='Кол-во')
-                ui.table.from_pandas(dist, row_key='Грейд').classes('w-full')
+    order = [g[1] for g in config.GRADES]
+    g_rows = "".join(
+        "<tr><td>" + e(name) + "</td><td><b>" + str(cnt) + "</b></td></tr>"
+        for name, cnt in sorted(grades.items(),
+                                key=lambda x: order.index(x[0]) if x[0] in order else 99)
+    ) or '<tr><td colspan="2" class="muted">Нет данных</td></tr>'
 
-            with ui.card().classes('flex-1'):
-                ui.label('Премии по сотрудникам').classes('text-subtitle1')
-                ui.echart({
-                    'xAxis': {'type': 'category', 'data': df['Сотрудник'].tolist()},
-                    'yAxis': {'type': 'value'},
-                    'series': [{'type': 'bar', 'data': df['Премия'].tolist()}],
-                    'grid': {'containLabel': True},
-                }).classes('h-64 w-full')
+    r_rows = "".join(
+        '<tr><td>' + e(r["comp"]) + '</td>'
+        '<td><span class="prio' + str(r["prio"]) + '">п' + str(r["prio"]) + "</span></td>"
+        "<td>" + e(r["goal"]) + "</td>"
+        "<td>" + str(r["count"]) + " / " + str(r["need"]) + "</td>"
+        '<td class="muted">' + e(", ".join(r["owners"]) or "—") + "</td>"
+        '<td><span class="badge ' + r["status"] + '">'
+        + ("дыра" if r["status"] == "risk" else "мало" if r["status"] == "warn" else "ок")
+        + "</span></td></tr>"
+        for r in risk[:20]
+    ) or '<tr><td colspan="6" class="muted">Все компетенции закрыты</td></tr>'
 
-    nav()
+    p_rows = "".join(
+        "<tr><td>" + e(p["name"]) + "</td><td>" + str(p["count"]) + "</td>"
+        '<td class="muted">' + e(", ".join(p["able"]) or "—") + "</td>"
+        '<td><span class="badge ' + p["status"] + '">'
+        + ("один человек" if p["status"] == "risk" else "тесно" if p["status"] == "warn" else "ок")
+        + "</span></td></tr>"
+        for p in proj_risk[:15]
+    ) or '<tr><td colspan="4" class="muted">Проекты покрыты</td></tr>'
 
-@ui.page('/goals')
+    body = (
+        "<h2>Дашборд</h2>"
+        '<div class="grid">' + cards + "</div>"
+        "<h3>Грейды команды</h3>"
+        '<div class="card wrap"><table><tr><th>Грейд</th><th>Человек</th></tr>'
+        + g_rows + "</table></div>"
+        "<h3>Риски покрытия компетенций (порог 3 балла)</h3>"
+        '<div class="card wrap"><table><tr><th>Компетенция</th><th>Приоритет</th>'
+        "<th>Цель</th><th>Владеют</th><th>Кто</th><th>Статус</th></tr>" + r_rows + "</table></div>"
+        "<h3>Проекты под риском (bus factor)</h3>"
+        '<div class="card wrap"><table><tr><th>Проект</th><th>Могут подменить</th>'
+        "<th>Кто</th><th>Статус</th></tr>" + p_rows + "</table></div>"
+    )
+    return page("Дашборд", body, "dashboard")
+
+
+def page_team(data):
+    grade_names = dict((g[0], g[1]) for g in config.GRADES)
+    rows = ""
+    for emp in data["employees"]:
+        code, name = grading.grade_of(emp)
+        nxt_code, checks = grading.next_grade_gap(emp)
+        done = sum(1 for c in checks if c["ok"])
+        prog = (str(done) + "/" + str(len(checks))) if checks else "максимум"
+        goals = grading.goal_breakdown(emp)
+        gtxt = " · ".join(g + ": " + str(v) for g, v in goals.items() if v)
+        k = config.GRADE_K.get(code, "—")
+        salary = str(int(emp.get("salary", 0))).replace(",", " ")
+        rows += (
+            "<tr><td><b>" + e(emp["name"]) + "</b></td>"
+            "<td>" + salary + " ₽</td>"
+            "<td>" + e(name) + "</td>"
+            "<td>" + str(grading.average(emp)) + "</td>"
+            "<td>×" + str(k) + "</td>"
+            '<td class="muted">' + e(gtxt) + "</td>"
+            "<td>→ " + e(grade_names.get(nxt_code, "—"))
+            + ' <span class="muted">(' + prog + ")</span></td>"
+            '<td><a href="/matrix?emp=' + q(emp["name"]) + '">'
+            '<button class="ghost">оценки</button></a></td></tr>'
+        )
+
+    body = (
+        "<h2>Команда</h2>"
+        '<p class="muted">Грейд считается по компетенциям (система планок). '
+        "Оценка A–E по целям — Этап 2.</p>"
+        '<div class="card wrap"><table>'
+        "<tr><th>Сотрудник</th><th>Оклад</th><th>Грейд</th><th>Средний балл</th>"
+        "<th>K грейда</th><th>Срез по целям</th><th>До следующего грейда</th><th></th></tr>"
+        + rows + "</table></div>"
+    )
+    return page("Команда", body, "team")
+
+
+def page_matrix(data, emp_name=None):
+    emps = [x["name"] for x in data["employees"]]
+    if not emps:
+        return page("Оценки", "<h2>Оценки</h2><div class='card'>Нет сотрудников</div>", "matrix")
+
+    if emp_name not in emps:
+        emp_name = emps[0]
+    emp = st.find_employee(data, emp_name)
+
+    opts = "".join(
+        '<option ' + ("selected" if n == emp_name else "") + ">" + e(n) + "</option>"
+        for n in emps
+    )
+
+    rows = ""
+    for name, cat, prio, goal in config.COMPS:
+        val = (emp or {}).get("scores", {}).get(name)
+        cells = ""
+        for s in (1, 2, 3, 4, 5):
+            url = "/set?emp=" + q(emp_name) + "&comp=" + q(name) + "&v=" + str(s)
+            cls = "ghost on" if val == s else "ghost"
+            cells += '<a href="' + url + '"><button class="' + cls + '">' + str(s) + "</button></a> "
+        clear = ('<a href="/set?emp=' + q(emp_name) + "&comp=" + q(name)
+                 + '&v=0"><button class="del">×</button></a>')
+        rows += (
+            "<tr><td>" + e(name) + "</td>"
+            '<td class="muted">' + e(cat) + "</td>"
+            '<td><span class="prio' + str(prio) + '">п' + str(prio) + "</span></td>"
+            "<td>" + e(goal) + "</td>"
+            '<td class="scores">' + cells + " " + clear
+            + " <b>" + (str(val) if val else "—") + "</b></td></tr>"
+        )
+
+    info = ""
+    if emp:
+        code, gname = grading.grade_of(emp)
+        nxt, checks = grading.next_grade_gap(emp)
+        items = "".join(
+            "<li>" + ("✅" if c["ok"] else "❌") + " " + e(c["text"]) + "</li>"
+            for c in checks
+        ) or "<li class='muted'>Грейд максимальный</li>"
+        info = (
+            '<div class="card"><b>' + e(emp["name"]) + "</b> — " + e(gname)
+            + " · средний балл " + str(grading.average(emp))
+            + '<h3 style="margin-bottom:6px">До следующего грейда ('
+            + e(dict((g[0], g[1]) for g in config.GRADES).get(nxt, "—")) + ")</h3>"
+            '<ul style="margin:0;padding-left:18px">' + items + "</ul></div>"
+        )
+
+    body = (
+        "<h2>Оценки компетенций</h2>"
+        '<form class="card"><label>Сотрудник: '
+        '<select name="emp" onchange="this.form.submit()">' + opts + "</select></label></form>"
+        + info
+        + '<div class="card wrap"><table><tr><th>Компетенция</th><th>Категория</th>'
+        "<th>Приоритет</th><th>Цель</th><th>Балл</th></tr>" + rows + "</table></div>"
+    )
+    return page("Оценки", body, "matrix")
+
+
 def page_goals():
-    header('Цели -> Оценка A-E')
-
-    with ui.column().classes('p-4 w-full max-w-6xl mx-auto gap-4 pb-20'):
-
-        @ui.refreshable
-        def goals_table():
-            gdf = pd.DataFrame(STATE['goals']).rename(columns={
-                'person': 'Сотрудник', 'goal': 'Цель', 'c': 'Ц.',
-                'pct': '% вып.', 'over': 'Перевыполнил'})
-            ui.table.from_pandas(gdf).classes('w-full')
-
-        goals_table()
-
-        ui.label('Добавить цель').classes('text-h6 mt-4')
-        with ui.card().classes('w-full'):
-            with ui.row().classes('gap-4'):
-                p = ui.select(PPL, value=PPL[0], label='Сотрудник').classes('w-56')
-                goal = ui.input('Цель').classes('flex-1')
-                cc = ui.select(['Ц1', 'Ц2', 'Ц3'], value='Ц1', label='Привязка').classes('w-32')
-            with ui.row().classes('gap-4 items-center'):
-                pct = ui.slider(min=0, max=150, value=100).classes('flex-1')
-                over = ui.checkbox('Перевыполнил (инструмент автоматизации)')
-
-            def add():
-                if not goal.value:
-                    ui.notify('Введи название цели', type='warning')
-                    return
-                STATE['goals'].append({'person': p.value, 'goal': goal.value,
-                                       'c': cc.value, 'pct': int(pct.value),
-                                       'over': over.value})
-                save(STATE)
-                ui.notify('Цель добавлена', type='positive')
-                goal.value = ''
-                goals_table.refresh()
-                calc_table.refresh()
-
-            ui.button('Добавить', on_click=add).props('color=primary')
-
-        ui.label('Расчётная оценка').classes('text-h6 mt-4')
-
-        @ui.refreshable
-        def calc_table():
-            df = results_df()[['Сотрудник', '% цели', 'Оценка', 'Смысл']]
-            ui.table.from_pandas(df, row_key='Сотрудник').classes('w-full')
-
-        calc_table()
-
-    nav()
+    cards = ""
+    for g, d in config.GOALS.items():
+        comps = [c for c in config.COMPS if c[3] == g]
+        chips = "".join(
+            '<div style="padding:4px 0"><span class="prio' + str(p) + '">п' + str(p)
+            + "</span> " + e(n) + ' <span class="muted">· ' + e(cat) + "</span></div>"
+            for n, cat, p, _ in comps
+        )
+        metrics = "".join("<li>" + e(m) + "</li>" for m in d["metrics"])
+        cards += (
+            '<div class="card"><h3 style="margin-top:0">' + e(g) + " — " + e(d["name"]) + "</h3>"
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">'
+            '<div><b class="muted">Ключевые компетенции (' + str(len(comps)) + ")</b>"
+            + chips + "</div>"
+            '<div><b class="muted">Метрики (Этап 2)</b><ul class="muted">' + metrics
+            + "</ul></div></div></div>"
+        )
+    body = (
+        "<h2>Цели</h2>"
+        '<p class="muted">Цель задаёт, на что работает группа компетенций. '
+        "Грейд считается по компетенциям; расчёт выполнения целей и оценка A–E — Этап 2.</p>"
+        + cards
+    )
+    return page("Цели", body, "goals")
 
 
-@ui.page('/salary')
-def page_salary():
-    header('Калькулятор премии')
+def page_projects(data, msg=""):
+    emps = [x["name"] for x in data["employees"]]
+    rows = ""
+    for p in st.project_coverage(data):
+        owners = ", ".join(n + " (" + str(s) + ")" for n, s in p["owners"].items()) or "—"
+        rows += (
+            "<tr><td><b>" + e(p["name"]) + "</b></td><td>" + str(len(p["owners"])) + "</td>"
+            '<td class="muted">' + e(owners) + "</td><td>" + str(p["count"]) + "</td>"
+            '<td><span class="badge ' + p["status"] + '">'
+            + ("один человек" if p["status"] == "risk" else "тесно" if p["status"] == "warn" else "ок")
+            + "</span></td>"
+            '<td><a href="/delproject?name=' + q(p["name"])
+            + '"><button class="del">удалить</button></a></td></tr>'
+        )
 
-    with ui.column().classes('p-4 w-full max-w-3xl mx-auto gap-4 pb-20'):
-        ui.label('Меняй оклад или грейд - премия пересчитается на лету.').classes('text-caption text-grey-7')
-
-        with ui.card().classes('w-full'):
-            person = ui.select(PPL, value=PPL[0], label='Сотрудник').classes('w-64')
-            base = ui.number('Оклад, руб.', step=5000, format='%.0f').classes('w-64')
-
-            grade_opts = {}
-            for gidx, g in enumerate(GRADES):
-                grade_opts[g[0] + ' (' + str(int(g[2] * 100)) + '%)'] = gidx
-            pc = ui.select(grade_opts, label='Грейд (доля премии)').classes('w-64')
-
-            mark_opts = {}
-            for m in MARK_K:
-                mark_opts[m + ' - ' + MARK_LABEL[m]] = m
-            coef = ui.select(mark_opts, label='Оценка').classes('w-64')
-
-            result = ui.label().classes('text-h4 font-bold text-green-8 mt-4')
-
-            def recalc():
-                gidx = pc.value if pc.value is not None else -1
-                pcv = GRADES[gidx][2] if gidx is not None and gidx >= 0 else 0.0
-                mk = coef.value
-                prem = round((base.value or 0) * pcv * MARK_K.get(mk, 0))
-                result.text = 'Премия: ' + fmt_rub(prem) + ' руб.'
-
-            def load(p):
-                df = results_df()
-                r = df[df['Сотрудник'] == p]
-                if r.empty:
-                    return
-                r = r.iloc[0]
-                base.value = int(STATE['bases'].get(p, 0))
-                pc.value = int(r['gidx']) if int(r['gidx']) >= 0 else None
-                coef.value = r['Оценка']
-                recalc()
-
-            def save_base():
-                STATE['bases'][person.value] = int(base.value or 0)
-                save(STATE)
-                ui.notify('Оклад сохранён', type='positive')
-
-            person.on_value_change(lambda e: load(e.value))
-            base.on_value_change(lambda: recalc())
-            pc.on_value_change(lambda: recalc())
-            coef.on_value_change(lambda: recalc())
-
-            load(PPL[0])
-
-            with ui.row():
-                ui.button('Сохранить оклад', on_click=save_base).props('color=primary')
-
-            ui.code('ПРЕМИЯ = оклад x %премии(грейд) x коэффициент(оценка)')
-
-    nav()
+    eopts = "".join("<option>" + e(n) + "</option>" for n in emps)
+    body = (
+        "<h2>Проекты</h2>"
+        '<p class="muted">Проекты — отдельный слой данных (не компетенции). '
+        "Bus factor: один человек на проекте — риск.</p>"
+        + ('<div class="card"><b>' + e(msg) + "</b></div>" if msg else "")
+        + '<div class="card"><form method="get" action="/addproject" '
+        'style="display:flex;gap:8px;flex-wrap:wrap">'
+        '<input name="name" placeholder="Название проекта" required style="min-width:220px">'
+        '<select name="owner"><option value="">— владелец —</option>' + eopts + "</select>"
+        '<input name="score" type="number" min="1" max="5" value="3" style="width:70px">'
+        "<button>Добавить</button></form></div>"
+        '<div class="card wrap"><table>'
+        "<tr><th>Проект</th><th>Людей</th><th>Владельцы (балл)</th>"
+        "<th>Могут подменить</th><th>Статус</th><th></th></tr>"
+        + (rows or '<tr><td colspan="6" class="muted">Проектов нет</td></tr>')
+        + "</table></div>"
+    )
+    return page("Проекты", body, "projects")
 
 
-@ui.page('/export')
-def page_export():
-    header('Экспорт в Excel')
-
-    with ui.column().classes('p-4 w-full max-w-3xl mx-auto gap-4 pb-20'):
-        status = ui.label()
-
-        def do_export():
-            path = export('QA_System.xlsx',
-                          results=build_results(
-                              people=PPL, history=STATE['history'],
-                              bases=STATE['bases'], goals=STATE['goals'],
-                              scores=STATE['scores']),
-                          scores=STATE['scores'],
-                          goals=STATE['goals'])
-            status.text = 'Файл готов: ' + path
-            ui.notify('Excel сформирован', type='positive')
-
-        ui.button('Сформировать QA_System.xlsx', on_click=do_export).props('color=primary')
-        ui.label('Файл появится рядом с app.py').classes('text-caption text-grey-7')
-
-    nav()
+def page_error(tb, path):
+    body = (
+        "<h2>Ошибка обработки запроса</h2>"
+        '<div class="card"><p>Путь: <code>' + e(path) + "</code></p>"
+        '<p class="muted">Сервер не упал — можно вернуться назад и продолжить.</p></div>'
+        '<div class="card"><pre>' + e(tb) + "</pre></div>"
+        '<p><a href="/"><button>На дашборд</button></a></p>'
+    )
+    return page("Ошибка", body)
 
 
-@ui.page('/team')
-def page_team():
-    header('Команда')
-    df = results_df()
-    with ui.column().classes('p-4 w-full max-w-6xl mx-auto gap-4 pb-20'):
-        ui.table.from_pandas(df, row_key='Сотрудник').classes('w-full')
-        ui.label('История по кварталам').classes('text-h6 mt-4')
-        rows = []
-        for p in PPL:
-            d = {'Сотрудник': p}
-            for i, v in enumerate(STATE['history'].get(p, [])):
-                d['Q' + str(i + 1)] = v
-            d['Максимум'] = max(STATE['history'].get(p, []) or [0])
-            rows.append(d)
-        ui.table.from_pandas(pd.DataFrame(rows), row_key='Сотрудник').classes('w-full')
-    nav()
+# ------------------------------------------------------------------ сервер
 
-@ui.page('/scores')
-def page_scores():
-    header('Оценка компетенций', 'влияет на грейд')
-    with ui.column().classes('p-4 w-full max-w-6xl mx-auto gap-4 pb-20'):
-        ui.label('Балл 1-5. В грейд идут только ДА.').classes('text-caption text-grey-7')
-        person = ui.select(PPL, value=PPL[0], label='Сотрудник').classes('w-64')
-        calc_label = ui.label().classes('text-h6 text-blue-9')
-        sliders = {}
+class H(BaseHTTPRequestHandler):
+    def _send(self, body, code=200):
+        raw = body.encode("utf-8")
+        self.send_response(code)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Length", str(len(raw)))
+        self.end_headers()
+        self.wfile.write(raw)
 
-        def refresh_calc():
-            calc_label.text = 'Текущий % компетенций: ' + format(comp_pct(STATE['scores'][person.value]), '.2f')
+    def _redirect(self, to):
+        # HTTP-заголовки — только latin-1, поэтому кириллицу кодируем
+        self.send_response(302)
+        self.send_header("Location", quote(to, safe="/?=&%"))
+        self.end_headers()
 
-        @ui.refreshable
-        def editors():
-            sliders.clear()
-            row = STATE['scores'][person.value]
-            for i, comp in enumerate(COMPS):
-                name, cat, prio, w, ing = comp
-                with ui.row().classes('items-center gap-4 w-full'):
-                    mark = '*' if ing == chr(1044) + chr(1040) else '-'
-                    ui.label(mark + ' ' + name + ' (' + cat + ', вес ' + str(w) + ')').classes('w-96 text-sm')
-                    sliders[i] = ui.slider(min=1, max=5, step=1, value=int(row[i])).classes('flex-1')
-            refresh_calc()
+    def do_GET(self):
+        u = urlparse(self.path)
+        qq = parse_qs(u.query)
+        p = u.path
+        try:
+            data = st.load()
 
-        person.on_value_change(lambda: editors.refresh())
-        with ui.card().classes('w-full'):
-            editors()
+            if p in ("/", "/dashboard"):
+                return self._send(page_dashboard(data))
+            if p == "/team":
+                return self._send(page_team(data))
+            if p == "/matrix":
+                return self._send(page_matrix(data, qq.get("emp", [None])[0]))
+            if p == "/goals":
+                return self._send(page_goals())
+            if p == "/projects":
+                return self._send(page_projects(data, qq.get("msg", [""])[0]))
 
-        def do_save():
-            STATE['scores'][person.value] = [int(sliders[i].value) for i in range(len(COMPS))]
-            save(STATE)
-            refresh_calc()
-            ui.notify('Баллы сохранены: ' + person.value, type='positive')
+            if p == "/set":
+                emp = qq.get("emp", [""])[0]
+                comp = qq.get("comp", [""])[0]
+                value = qq.get("v", ["0"])[0]
+                st.set_score(data, emp, comp, value)
+                return self._redirect("/matrix?emp=" + quote(emp, safe=""))
 
-        def do_reset():
-            from config import SCORES as DEF
-            STATE['scores'][person.value] = list(DEF[person.value])
-            save(STATE)
-            editors.refresh()
-            ui.notify('Сброшено к config', type='info')
+            if p == "/addproject":
+                ok = st.add_project(data, qq.get("name", [""])[0],
+                                    qq.get("owner", [""])[0] or None,
+                                    qq.get("score", ["3"])[0])
+                msg = "Проект сохранён" if ok else "Не задано название"
+                return self._redirect("/projects?msg=" + quote(msg, safe=""))
 
-        with ui.row():
-            ui.button('Сохранить', on_click=do_save).props('color=primary')
-            ui.button('Сбросить', on_click=do_reset).props('flat')
+            if p == "/delproject":
+                st.remove_project(data, qq.get("name", [""])[0])
+                return self._redirect("/projects")
 
-        ui.label('Текущая матрица оценок').classes('text-h6 mt-4')
-        data = []
-        for i in range(len(COMPS)):
-            data.append([COMPS[i][0]] + [STATE['scores'][p][i] for p in PPL])
-        ui.table.from_pandas(pd.DataFrame(data, columns=['Компетенция'] + PPL), row_key='Компетенция').classes('w-full')
-    nav()
+            if p == "/reset":
+                st.reset_demo()
+                return self._redirect("/")
 
-ui.run(title=APP_NAME, dark=False, reload=False, host='0.0.0.0', port=8080)
+            return self._send(page("404", "<h2>Страница не найдена</h2>"), 404)
+
+        except Exception:
+            return self._send(page_error(traceback.format_exc(), self.path), 500)
+
+    def log_message(self, *a):
+        pass
+
+
+if __name__ == "__main__":
+    print("QA Stage 1 -> http://127.0.0.1:8080")
+    HTTPServer((HOST, PORT), H).serve_forever()

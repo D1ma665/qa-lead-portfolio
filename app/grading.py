@@ -1,96 +1,147 @@
-from config import (GRADES, MARK_K, MARK_LABEL, PAUSE_QUARTERS,
-                    RISK_QUARTERS, GOALS, HISTORY, BASES, PPL, COMPS, SCORES)
+"""
+grading.py — расчёт грейда и покрытия команды (Этап 1)
+
+Грейд — «система планок»: максимальный уровень, все пороги которого
+выполнены. Берутся только компетенции, входящие в оценку (есть балл 1–5).
+
+Этап 1: НЕ считает A–E по целям и премию по целям.
+"""
+
+import config
 
 
-def comp_pct(scores_row):
-    tw = 0.0
-    acc = 0.0
-    for i, c in enumerate(COMPS):
-        if c[4] != chr(1044) + chr(1040):
-            continue
-        b = max(1, min(5, int(scores_row[i])))
-        acc += ((b - 1) / 4 * 100) * c[3]
-        tw += c[3]
-    return round(acc / tw, 2) if tw else 0.0
+def scores_for(emp, comps=None):
+    """Баллы сотрудника по компетенциям в виде {название: балл}."""
+    comps = comps or config.COMPS
+    raw = emp.get("scores", {})
+    return {name: raw[name] for name, *_ in comps if raw.get(name) not in (None, "")}
 
 
-def goal_ratio(person, goals):
-    gs = [g for g in goals if g["person"] == person]
-    return round(sum(g["pct"] for g in gs) / len(gs)) if gs else 0
+def by_priority(emp, prio, comps=None):
+    """Список баллов сотрудника по компетенциям заданного приоритета."""
+    comps = comps or config.COMPS
+    sc = scores_for(emp, comps)
+    return [sc[name] for name, _cat, p, _goal in comps if p == prio and name in sc]
 
 
-def mark_from_goals(person, goals):
-    gs = [g for g in goals if g["person"] == person]
-    if not gs:
-        return "E"
-    r = goal_ratio(person, goals)
-    over = any(g["over"] and g["pct"] >= 100 for g in gs)
-    if over and r >= 100: return "A"
-    if r >= 100: return "B"
-    if r >= 60: return "C"
-    if r >= 30: return "D"
-    return "E"
+def average(emp, comps=None):
+    vals = list(scores_for(emp, comps).values())
+    return round(sum(vals) / len(vals), 2) if vals else 0.0
 
 
-def grade_idx(pct):
-    idx = -1
-    for i, g in enumerate(GRADES):
-        if pct >= g[1]:
-            idx = i
-    return idx
+def grade_of(emp, comps=None):
+    """
+    Возвращает (code, name) максимального грейда, все планки которого выполнены.
+    Если не проходит даже Джун 1 — ("none", "Ниже Джун 1").
+    """
+    comps = comps or config.COMPS
+    avg = average(emp, comps)
+    reached = ("none", "Ниже Джун 1")
+
+    for code, name, p1, p2, p3, avg_min, p1_few in config.GRADES:
+        ok = True
+        if p1 is not None:
+            v = by_priority(emp, 1, comps)
+            ok = bool(v) and min(v) >= p1
+        if ok and p2 is not None:
+            v = by_priority(emp, 2, comps)
+            ok = bool(v) and min(v) >= p2
+        if ok and p3 is not None:
+            v = by_priority(emp, 3, comps)
+            ok = bool(v) and min(v) >= p3
+        if ok and p1_few is not None:
+            v = by_priority(emp, 1, comps)
+            ok = sum(1 for x in v if x >= p1_few) >= 2
+        if ok and avg_min is not None:
+            ok = avg >= avg_min
+        if ok:
+            reached = (code, name)
+    return reached
 
 
-def quarters_below(person, gidx, history):
-    thr = GRADES[gidx][1] if gidx >= 0 else min(g[1] for g in GRADES)
-    below = 0
-    for h in reversed(history.get(person, [])):
-        if h < thr:
-            below += 1
-        else:
-            break
-    return below
+def next_grade_gap(emp, comps=None):
+    """
+    Что не хватает до следующего грейда.
+    Возвращает список требований вида {'text': ..., 'ok': bool}.
+    """
+    code, _name = grade_of(emp, comps)
+    codes = [g[0] for g in config.GRADES]
+    idx = codes.index(code) + 1 if code in codes else 0
+    if idx >= len(codes):
+        return ("senior6", [])
 
+    c, n, p1, p2, p3, avg_min, p1_few = config.GRADES[idx]
+    comps = comps or config.COMPS
+    checks = []
 
-def discipline_state(below):
-    if below >= RISK_QUARTERS: return "RISK"
-    if below >= PAUSE_QUARTERS: return "PAUSE"
-    if below >= 1: return "WARN"
-    return "OK"
-
-
-def build_results(people=None, history=None, bases=None, goals=None, scores=None):
-    people = PPL if people is None else people
-    history = HISTORY if history is None else history
-    bases = BASES if bases is None else bases
-    goals = GOALS if goals is None else goals
-    scores = SCORES if scores is None else scores
-
-    out = []
-    for p in people:
-        cur = comp_pct(scores.get(p, [1] * len(COMPS)))
-        hist = history.get(p, [])
-        last = hist[-1] if hist else cur
-        best = max(hist) if hist else 0
-        gi = grade_idx(cur)
-        below = quarters_below(p, gi, history)
-        st = discipline_state(below)
-        mk = mark_from_goals(p, goals)
-        r = goal_ratio(p, goals)
-        gname = GRADES[gi][0] if gi >= 0 else "-"
-        gpc = GRADES[gi][2] if gi >= 0 else 0.0
-        prem = round(bases.get(p, 0) * gpc * MARK_K[mk])
-        out.append({
-            "\u0421\u043e\u0442\u0440\u0443\u0434\u043d\u0438\u043a": p,
-            "% \u043a\u043e\u043c\u043f\u0435\u0442\u0435\u043d\u0446\u0438\u0439": cur,
-            "\u0413\u0440\u0435\u0439\u0434": gname,
-            "gidx": gi,
-            "% \u043f\u0440\u0435\u043c\u0438\u0438": gpc,
-            "% \u0446\u0435\u043b\u0438": r,
-            "\u041e\u0446\u0435\u043d\u043a\u0430": mk,
-            "\u0421\u043c\u044b\u0441\u043b": MARK_LABEL[mk],
-            "\u041a\u043e\u044d\u0444.": MARK_K[mk],
-            "\u041e\u043a\u043b\u0430\u0434": bases.get(p, 0),
-            "\u041f\u0440\u0435\u043c\u0438\u044f": prem,
-            "\u0421\u0442\u0430\u0442\u0443\u0441": st,
+    def add_prio(prio, need):
+        v = by_priority(emp, prio, comps)
+        worst = min(v) if v else 0
+        total = len(v)
+        missing = sum(1 for x in v if x < need)
+        tail = ", не хватает " + str(missing) if missing else ", все готовы"
+        checks.append({
+            "text": f"п{prio} ≥ {need} — все {total} компетенций {tail} (сейчас мин. {worst})",
+            "ok": bool(v) and worst >= need,
         })
+
+    if p1 is not None:
+        add_prio(1, p1)
+    if p2 is not None:
+        add_prio(2, p2)
+    if p3 is not None:
+        add_prio(3, p3)
+    if p1_few is not None:
+        v = by_priority(emp, 1, comps)
+        cnt = sum(1 for x in v if x >= p1_few)
+        checks.append({"text": f"минимум 2 компетенции приоритета 1 на {p1_few}+ (сейчас {cnt})", "ok": cnt >= 2})
+    if avg_min is not None:
+        a = average(emp, comps)
+        checks.append({"text": f"средняя ≥ {avg_min} (сейчас {a})", "ok": a >= avg_min})
+
+    return (c, checks)
+
+
+# ------------------------------------------------------ покрытие команды
+
+def coverage(employees, comps=None, threshold=3):
+    """
+    Покрытие компетенций командой: кто владеет на уровне >= threshold.
+    Для приоритета 1 важно, что владеют ВСЕ; для 2 — несколько; для 3 — один-два.
+    """
+    comps = comps or config.COMPS
+    total = len(employees)
+    rows = []
+
+    for name, cat, prio, goal in comps:
+        owners = [e for e in employees if (e.get("scores", {}).get(name) or 0) >= threshold]
+        n = len(owners)
+        if prio == 1:
+            need = total
+            status = "ok" if n >= total else "risk"
+        elif prio == 2:
+            need = max(2, round(total * 0.3))
+            status = "ok" if n >= need else "risk"
+        else:
+            need = 2
+            status = "ok" if n >= need else ("risk" if n == 0 else "warn")
+        rows.append({
+            "comp": name, "cat": cat, "prio": prio, "goal": goal,
+            "owners": [e.get("name") for e in owners],
+            "count": n, "need": need, "total": total, "status": status,
+        })
+    return rows
+
+
+def goal_breakdown(emp, comps=None):
+    """
+    Срез по целям: средний балл компетенций, привязанных к каждой цели.
+    Только для просмотра (в Этапе 1 не влияет на A–E).
+    """
+    comps = comps or config.COMPS
+    sc = scores_for(emp, comps)
+    out = {}
+    for g in config.GOALS:
+        vals = [sc[n] for n, _c, _p, goal in comps if goal == g and n in sc]
+        out[g] = round(sum(vals) / len(vals), 2) if vals else None
     return out
