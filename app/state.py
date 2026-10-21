@@ -78,7 +78,8 @@ def _demo_scores(profile):
     """Баллы по всем компетенциям согласно профилю приоритетов."""
     p1, p2, p3 = profile
     out = {}
-    for name, _cat, prio, _goal in config.COMPS:
+    comps = data.get("competencies") or [list(c) for c in config.COMPS]
+    for name, _cat, prio, _goal in comps:
         out[name] = {1: p1, 2: p2, 3: p3}[prio]
     return out
 
@@ -91,18 +92,22 @@ def demo_state():
         emps.append(e)
     return {"employees": emps,
             "projects": [dict(p) for p in DEMO_PROJECTS],
-            "goals_template": copy.deepcopy(config.GOALS_TEMPLATE)}
+            "goals_template": copy.deepcopy(config.GOALS_TEMPLATE),
+            "competencies": [list(c) for c in config.COMPS]}
 
 
 # ------------------------------------------------------------- загрузка
 
 def _normalize(data):
     """Приводим данные к актуальному справочнику компетенций."""
-    names = [c[0] for c in config.COMPS]
+    comps = data.get("competencies") or [list(c) for c in config.COMPS]
+    names = [c[0] for c in comps]
     for emp in data.get("employees", []):
         old = emp.get("scores") or {}
         emp["scores"] = {n: old[n] for n in names if old.get(n) not in (None, "")}
     data.setdefault("projects", [])
+    if "competencies" not in data:
+        data["competencies"] = [list(c) for c in config.COMPS]
     if "goals_template" not in data:
         data["goals_template"] = copy.deepcopy(getattr(config, "GOALS_TEMPLATE", {}))
     return data

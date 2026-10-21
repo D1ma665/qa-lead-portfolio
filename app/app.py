@@ -113,7 +113,7 @@ def page_dashboard(data):
         '<div class="kpi"><span class="muted">' + str(k) + "</span><b>" + str(v) + "</b></div>"
         for k, v in [
             ("Сотрудников", len(emps)),
-            ("Компетенций", len(config.COMPS)),
+            ("Компетенций", len(data.get("competencies") or config.COMPS)),
             ("Проблем в покрытии", len(risk)),
             ("Проектов под риском", len(proj_risk)),
         ]
