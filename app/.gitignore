@@ -1,3 +1,7 @@
 patch*.py
 *.pyn
 *.bak
+*.old
+*.broken
+*.broken2
+*.bak

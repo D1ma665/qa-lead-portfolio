@@ -14,6 +14,7 @@ state.py — данные команды (Этап 1)
 
 import json
 import os
+import copy
 
 import config
 
@@ -88,7 +89,9 @@ def demo_state():
         e = dict(emp)
         e["scores"] = _demo_scores(prof)
         emps.append(e)
-    return {"employees": emps, "projects": [dict(p) for p in DEMO_PROJECTS]}
+    return {"employees": emps,
+            "projects": [dict(p) for p in DEMO_PROJECTS],
+            "goals_template": copy.deepcopy(config.GOALS_TEMPLATE)}
 
 
 # ------------------------------------------------------------- загрузка
@@ -100,6 +103,8 @@ def _normalize(data):
         old = emp.get("scores") or {}
         emp["scores"] = {n: old[n] for n in names if old.get(n) not in (None, "")}
     data.setdefault("projects", [])
+    if "goals_template" not in data:
+        data["goals_template"] = copy.deepcopy(getattr(config, "GOALS_TEMPLATE", {}))
     return data
 
 
