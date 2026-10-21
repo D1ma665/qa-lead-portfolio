@@ -65,7 +65,7 @@ overflow:auto;font-size:12px;color:#fca5a5}
 """
 
 TABS = [("dashboard", "Дашборд"), ("team", "Команда"), ("matrix", "Оценки"),
-        ("goals", "Цели"), ("projects", "Проекты")]
+        ("comps", "Компетенции"), ("goals", "Цели"), ("projects", "Проекты")]
 
 
 def nav_html(active):
