@@ -163,6 +163,31 @@ def page_dashboard(data):
     return page("Дашборд", body, "dashboard")
 
 
+def page_comp_form(data=None, comp=None):
+    """Форма добавления/правки компетенции."""
+    c = list(comp) if comp else ["", "Проф навыки", 1, ""]
+    name = c[0] if len(c) > 0 else ""
+    cat = c[1] if len(c) > 1 else ""
+    prio = c[2] if len(c) > 2 else 1
+    code = c[3] if len(c) > 3 else ""
+    opts = "".join(
+        '<option value="%s"%s>%s</option>' % (p, " selected" if str(prio) == str(p) else "", p)
+        for p in (1, 2, 3))
+    body = (
+        '<h2>%s</h2>'
+        '<div class="card"><form method="get" action="/comps/save">'
+        '<label>Название: <input name="name" value="%s" required></label><br>'
+        '<label>Группа: <input name="cat" value="%s"></label><br>'
+        '<label>Код (Ц1, Ц2...): <input name="code" value="%s"></label><br>'
+        '<label>Приоритет: <select name="prio">%s</select></label><br>'
+        '<button class="btn" type="submit">Сохранить</button> '
+        '<a class="btn" href="/comps">Отмена</a>'
+        '</form></div>' % (
+            "Правка компетенции" if comp else "Новая компетенция",
+            e(name), e(cat), e(code), opts))
+    return page("Компетенции", body, "comps")
+
+
 def page_comps(data=None):
     """Справочник компетенций (чтение)."""
     comps = (data or {}).get("competencies") or list(config.COMPS)
@@ -178,6 +203,7 @@ def page_comps(data=None):
         '<h2>Компетенции</h2>'
         '<p class="muted">Всего: %d. Приоритет 1 — планка 3 балла, '
         'приоритет 2 — 2 балла, приоритет 3 не анализируется.</p>'
+        '<p><a class="btn" href="/comps/add">+ Компетенция</a></p>'
         '<table class="tbl"><tr><th>Компетенция</th><th>Группа</th>'
         '<th>Приоритет</th></tr>%s</table>' % (len(comps), rows))
     return page("Компетенции", body, "comps")
@@ -427,6 +453,11 @@ class H(BaseHTTPRequestHandler):
             if p == "/delproject":
                 st.remove_project(data, qq.get("name", [""])[0])
                 return self._redirect("/projects")
+
+            if p == "/comps":
+                return self._send(page_comps(data))
+            if p == "/comps/add":
+                return self._send(page_comp_form(data))
 
             if p == "/reset":
                 st.reset_demo()
