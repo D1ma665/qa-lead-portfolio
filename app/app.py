@@ -114,7 +114,7 @@ def page_dashboard(data):
         '<div class="kpi"><span class="muted">' + str(k) + "</span><b>" + str(v) + "</b></div>"
         for k, v in [
             ("Сотрудников", len(emps)),
-            ("Компетенций", len(data.get("competencies") or config.COMPS)),
+            ("Компетенций", len(data.get("competencies") or [])),
             ("Проблем в покрытии", len(risk)),
             ("Проектов под риском", len(proj_risk)),
         ]
@@ -187,31 +187,51 @@ def page_comp_form(data=None, comp=None):
         '</form></div>' % (
             "Правка компетенции" if comp else "Новая компетенция",
             e(name), e(name), e(cat), e(code), opts))
+    body += bus_factor_block(data)
     return page("Компетенции", body, "comps")
+
+
+def bus_factor_block(data):
+    proj_risk = (data or {}).get("projects_at_risk") or []
+    if not proj_risk:
+        rows = '<tr><td colspan="4" class="muted">Проекты покрыты</td></tr>'
+    else:
+        rows = "".join(
+            '<tr><td>' + e(p["name"]) + '</td><td>' + str(p["count"]) + '</td>'
+            '<td class="muted">' + e(", ".join(p["able"]) or "—") + '</td>'
+            '<td><span class="badge ' + (p["status"] or "ok") + '">'
+            + ("один человек" if p["status"] == "risk" else "тесно" if p["status"] == "warn" else "ok")
+            + '</span></td></tr>'
+            for p in proj_risk[:15]
+        )
+    return ('<h3>Проекты под риском (bus factor)</h3>'
+            '<div class="card wrap"><table>'
+            '<tr><th>Проект</th><th>Могут подменить</th><th>Кто</th><th>Статус</th></tr>'
+            + rows + '</table></div>')
 
 
 def page_comps(data=None):
     """Справочник компетенций (чтение)."""
     comps = (data or {}).get("competencies") or list(config.COMPS)
     rows = ""
-    for c in comps:
+    for idx, c in enumerate(comps, 1):
         name, cat, prio = c[0], c[1], c[2]
         code = c[3] if len(c) > 3 and c[3] else ""
         cat_full = (cat + (" / " + code if code else "")) if cat else code
         cls = "risk" if prio == 1 else ""
         q = urllib.parse.quote(name)
-        rows += ('<tr><td>%s</td><td class="muted">%s</td>'
+        rows += ('<tr><td class="muted">%d</td><td>%s</td><td class="muted">%s</td>'
                  '<td><b class="%s">%s</b></td>'
                  '<td><a href="/comps/edit?name=%s">✎</a> '
                  '<a href="/comps/del?name=%s" onclick="return confirm(\'Удалить?\')">✕</a>'
-                 '</td></tr>' % (e(name), e(cat_full), cls, prio, q, q))
+                 '</td></tr>' % (idx, e(name), e(cat_full), cls, prio, q, q))
     body = (
         '<h2>Компетенции</h2>'
         '<p class="muted">Всего: %d. Приоритет 1 — планка 3 балла, '
         'приоритет 2 — 2 балла, приоритет 3 не анализируется.</p>'
         '<p><a class="btn" href="/comps/add">+ Компетенция</a></p>'
-        '<table class="tbl"><tr><th>Компетенция</th><th>Группа</th>'
-        '<th>Приоритет</th></tr>%s</table>' % (len(comps), rows))
+        '<table class="tbl"><tr><th>№</th><th>Компетенция</th><th>Группа</th>'
+        '<th>Приоритет</th><th></th></tr>%s</table>' % (len(comps), rows))
     return page("Компетенции", body, "comps")
 
 
@@ -413,6 +433,8 @@ class H(BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(raw)))
+        self.send_header("Cache-Control", "no-store, no-cache, must-revalidate")
+        self.send_header("Pragma", "no-cache")
         self.end_headers()
         self.wfile.write(raw)
 
