@@ -107,6 +107,27 @@ def page_dashboard(data):
 
     cov = grading.coverage(emps)
     risk = [r for r in cov if r["status"] == "risk"]
+    comps_cov = []
+    _emp_names = [e0.get("name") if isinstance(e0, dict) else e0[0] for e0 in emps]
+    _cnt = {}
+    _who = {}
+    for _e in emps:
+        _en = _e.get("name") if isinstance(_e, dict) else _e[0]
+        _s = (_e.get("scores") if isinstance(_e, dict) else None) or {}
+        for _k, _v in _s.items():
+            if _v:
+                _cnt[_k] = _cnt.get(_k, 0) + 1
+                _who.setdefault(_k, []).append(_en)
+    for _c in (data.get("competencies") or []):
+        _name, _cat, _prio = _c[0], _c[1], _c[2]
+        if _prio not in (1, 2):
+            continue
+        _own = _cnt.get(_name, 0)
+        _st = "risk" if _own <= len(emps) - 2 else "warn" if _own <= len(emps) - 1 else "ok"
+        comps_cov.append({"comp": _name, "prio": _prio, "goal": _c[3] if len(_c) > 3 else "",
+                          "count": _own, "need": len(emps), "status": _st,
+                          "owners": _who.get(_name, [])})
+
     projects = st.project_coverage(data)
     proj_risk = [p for p in projects if p["status"] == "risk"]
 
@@ -136,7 +157,7 @@ def page_dashboard(data):
         '<td><span class="badge ' + r["status"] + '">'
         + ("дыра" if r["status"] == "risk" else "мало" if r["status"] == "warn" else "ок")
         + "</span></td></tr>"
-        for r in risk[:20]
+        for r in comps_cov[:40]
     ) or '<tr><td colspan="6" class="muted">Все компетенции закрыты</td></tr>'
 
     p_rows = "".join(
