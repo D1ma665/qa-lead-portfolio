@@ -11,11 +11,15 @@ grading.py — расчёт грейда и покрытия команды (Э�
 import config
 
 
-def scores_for(emp, comps=None):
-    """Баллы сотрудника по компетенциям в виде {название: балл}."""
+def scores_for(emp, comps=None, period=None):
+    """Баллы сотрудника по компетенциям (название: балл) за период."""
     comps = comps or config.COMPS
-    raw = emp.get("scores", {})
-    return {name: raw[name] for name, *_ in comps if raw.get(name) not in (None, "")}
+    period = period or getattr(config, "PERIOD_DEFAULT", None)
+    raw = emp.get("scores", {}) or {}
+    if any(isinstance(v, dict) for v in raw.values()):
+        raw = raw.get(period, {}) or {} if period else {}
+    names = [c[0] if isinstance(c, (tuple, list)) else c for c in comps]
+    return {n: raw[n] for n in names if raw.get(n) not in (None, "")}
 
 
 def by_priority(emp, prio, comps=None):

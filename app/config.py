@@ -157,3 +157,6 @@ GOALS_TEMPLATE = {
     "sen5": [], "senior6": [],
 }
 
+
+# Оценки хранятся по периодам: {"2026-Q4": {comp: score}}
+PERIOD_DEFAULT = "2026-Q4"
