@@ -555,6 +555,28 @@ class H(BaseHTTPRequestHandler):
                 return self._send(page_matrix(data, qq.get("emp", [None])[0]))
             if p == "/comps":
                 return self._send(page_comps(data))
+            if p == "/goals/save":
+                gk = qq.get("grade", [""])[0]
+                gid = qq.get("id", [""])[0]
+                name = qq.get("name", [""])[0].strip()
+                gtype = qq.get("type", ["standard"])[0]
+                lvl = qq.get("level", ["own"])[0]
+                tmpl = data.setdefault("goals_template", {})
+                lst = tmpl.setdefault(gk, [])
+                gz = next((x for x in lst if x.get("id") == gid), None)
+                if gz is None:
+                    return self._send(page_goal_edit(data, gk, gid, "Цель не найдена"))
+                if not name:
+                    return self._send(page_goal_edit(data, gk, gid, "Название не может быть пустым"))
+                if gtype not in ("standard", "extra"):
+                    gtype = "standard"
+                if lvl not in ("own", "above"):
+                    lvl = "own"
+                gz["name"] = name
+                gz["type"] = gtype
+                gz["level"] = lvl
+                st.save(data)
+                return self._redirect("/goals?grade=" + gk)
             if p == "/goals/edit":
                 return self._send(page_goal_edit(
                     data, qq.get("grade", [""])[0], qq.get("id", [""])[0]))
