@@ -1,3 +1,4 @@
+import config
 """
 grading.py — расчёт грейда и покрытия команды (Этап 1)
 
@@ -104,11 +105,13 @@ def next_grade_gap(emp, comps=None):
 
 # ------------------------------------------------------ покрытие команды
 
-def coverage(employees, comps=None, threshold=3):
+def coverage(employees, comps=None, threshold=None):
     """
     Покрытие компетенций командой: кто владеет на уровне >= threshold.
     Для приоритета 1 важно, что владеют ВСЕ; для 2 — несколько; для 3 — один-два.
     """
+    if threshold is None:
+        threshold = config.COVERAGE_MIN
     comps = comps or config.COMPS
     total = len(employees)
     rows = []

@@ -1,3 +1,4 @@
+import config
 """
 state.py — данные команды (Этап 1)
 
@@ -201,11 +202,13 @@ def assign_owner(data, project, owner, score=3):
     return False
 
 
-def project_coverage(data, risk_min=2):
+def project_coverage(data, risk_min=None):
     """
     Покрытие проектов: сколько человек владеет, риск если <= risk_min-1.
     Владеет = балл >= 3.
     """
+    if risk_min is None:
+        risk_min = config.BUS_FACTOR_RISK
     rows = []
     for p in data.get("projects", []):
         able = {n: s for n, s in p.get("owners", {}).items() if s >= 3}
