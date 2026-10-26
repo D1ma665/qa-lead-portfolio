@@ -161,7 +161,14 @@ def set_score(data, emp, comp, value, period=None):
     comp = (comp or "").strip()
     if not emp or not comp:
         return False
+    known = {c[0] if isinstance(c, (tuple, list)) else c for c in config.COMPS}
+    if comp not in known:
+        return False
     try:
+        if isinstance(value, float) and not value.is_integer():
+            return False
+        if isinstance(value, str) and "." in value:
+            return False
         v = int(value)
     except (TypeError, ValueError):
         return False

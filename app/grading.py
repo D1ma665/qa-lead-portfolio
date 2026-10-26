@@ -15,9 +15,12 @@ def scores_for(emp, comps=None, period=None):
     """Баллы сотрудника по компетенциям (название: балл) за период."""
     comps = comps or config.COMPS
     period = period or getattr(config, "PERIOD_DEFAULT", None)
+    if not isinstance(emp, dict):
+        return {}
     raw = emp.get("scores", {}) or {}
     if any(isinstance(v, dict) for v in raw.values()):
         raw = raw.get(period, {}) or {} if period else {}
+    comps = config.COMPS if isinstance(comps, str) else comps
     names = [c[0] if isinstance(c, (tuple, list)) else c for c in comps]
     return {n: raw[n] for n in names if raw.get(n) not in (None, "")}
 
@@ -121,7 +124,8 @@ def coverage(employees, comps=None, threshold=None):
     rows = []
 
     for name, cat, prio, goal in comps:
-        owners = [e for e in employees if (e.get("scores", {}).get(name) or 0) >= threshold]
+        owners = [e for e in employees
+         if isinstance(e, dict) and (scores_for(e).get(name) or 0) >= threshold]
         n = len(owners)
         if prio == 1:
             need = total

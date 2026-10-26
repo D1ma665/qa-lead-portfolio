@@ -108,11 +108,12 @@ def page_dashboard(data):
     cov = grading.coverage(emps)
     risk = [r for r in cov if r["status"] == "risk"]
     comps_cov = []
-    _emp_names = [e0.get("name") if isinstance(e0, dict) else e0[0] for e0 in emps]
+    _emp_names = [e.get("name") for e in data.get("employees") or []
+                  if isinstance(e, dict) and e.get("name")]
     _cnt = {}
     _who = {}
     for _e in emps:
-        _en = _e.get("name") if isinstance(_e, dict) else _e[0]
+        _en = _e.get("name") if isinstance(_e, dict) else ""
         _sc = grading.scores_for(e) if isinstance(e, dict) else {}
         for k, v in _sc.items():
             if _v:
@@ -227,7 +228,7 @@ def page_comps(data=None):
 def page_team(data):
     grade_names = dict((g[0], g[1]) for g in config.GRADES)
     rows = ""
-    for emp in data["employees"]:
+    for emp in [x for x in data.get("employees") or [] if isinstance(x, dict)]:
         code, name = grading.grade_of(emp)
         nxt_code, checks = grading.next_grade_gap(emp)
         done = sum(1 for c in checks if c["ok"])
@@ -237,15 +238,15 @@ def page_team(data):
         k = config.GRADE_K.get(code, "—")
         salary = str(int(emp.get("salary", 0))).replace(",", " ")
         rows += (
-            "<tr><td><b>" + e(emp["name"]) + "</b></td>"
+        "<tr><td><b>" + str(name) + "</b></td>"
             "<td>" + salary + " ₽</td>"
-            "<td>" + e(name) + "</td>"
+        "<td>" + str(name) + "</td>"
             "<td>" + str(grading.average(emp)) + "</td>"
             "<td>×" + str(k) + "</td>"
             '<td class="muted">' + e(gtxt) + "</td>"
             "<td>→ " + e(grade_names.get(nxt_code, "—"))
             + ' <span class="muted">(' + prog + ")</span></td>"
-            '<td><a href="/matrix?emp=' + q(emp["name"]) + '">'
+            '<td><a href="/matrix?emp=' + q(emp.get("name", "-")) + '">'
             '<button class="ghost">оценки</button></a></td></tr>'
         )
 
@@ -270,7 +271,7 @@ def page_matrix(data, emp_name=None):
     if data is None:
         data = st.load()
     comps = (data or {}).get("competencies") or list(config.COMPS)
-    emps = [x["name"] for x in data["employees"]]
+    emps = [x.get("name") for x in data.get("employees") or [] if isinstance(x, dict) and x.get("name")]
     if not emps:
         return page("Оценки", "<h2>Оценки</h2><div class='card'>Нет сотрудников</div>", "matrix")
 
@@ -285,7 +286,7 @@ def page_matrix(data, emp_name=None):
 
     rows = ""
     for name, cat, prio, goal in comps:
-        val = (emp or {}).get("scores", {}).get(name)
+        val = grading.scores_for(emp).get(name, 0)
         cells = ""
         for s in (1, 2, 3, 4, 5):
             url = "/set?emp=" + q(emp_name) + "&comp=" + q(name) + "&v=" + str(s)
@@ -311,7 +312,7 @@ def page_matrix(data, emp_name=None):
             for c in checks
         ) or "<li class='muted'>Грейд максимальный</li>"
         info = (
-            '<div class="card"><b>' + e(emp["name"]) + "</b> — " + e(gname)
+            '<div class="card"><b>' + e(emp.get("name", "-")) + "</b> — " + e(gname)
             + " · средний балл " + str(grading.average(emp))
             + '<h3 style="margin-bottom:6px">До следующего грейда ('
             + e(dict((g[0], g[1]) for g in config.GRADES).get(nxt, "—")) + ")</h3>"
@@ -479,7 +480,7 @@ def page_goal_edit(data, grade, gid, msg=""):
 
 
 def page_projects(data, msg=""):
-    emps = [x["name"] for x in data["employees"]]
+    emps = [x.get("name") for x in data.get("employees") or [] if isinstance(x, dict) and x.get("name")]
     rows = ""
     for p in st.project_coverage(data):
         owners = ", ".join(n + " (" + str(s) + ")" for n, s in p["owners"].items()) or "—"
