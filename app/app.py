@@ -451,6 +451,9 @@ def page_goal_edit(data, grade, gid, msg=""):
         return page("Цель не найдена",
                     '<div class="card">Цель %s в грейде %s не найдена. '
                     '<a href="/goals">К списку</a></div>' % (e(gid), e(grade)), "goals")
+    crits = "\n".join(
+        ("!" if c.get("critical") else "") + c.get("text", "")
+        for c in (gz.get("criteria") or []))
     body = (
         '<h2>Правка цели</h2>'
         + ('<div class="card" style="color:#b00020">%s</div>' % e(msg) if msg else '')
@@ -469,6 +472,10 @@ def page_goal_edit(data, grade, gid, msg=""):
         % (' selected' if gz.get("level") == "own" else '')
         + '<option value="above"%s>выше</option></select></label></div>'
         % (' selected' if gz.get("level") == "above" else '')
+        + '<div style="margin:10px 0"><label>Критерии &mdash; по одному в строке, '
+        'с &#171;!&#187; в начале &mdash; критичный<br>'
+        + '<textarea name="criteria" rows="6" style="width:520px">%s</textarea></label></div>'
+        % e(crits)
         + '<button type="submit">Сохранить</button> '
         + '<a href="/goals?grade=%s" style="margin-left:12px">Отмена</a></form>' % e(grade))
     return page("Правка цели", body, "goals")
@@ -572,9 +579,25 @@ class H(BaseHTTPRequestHandler):
                     gtype = "standard"
                 if lvl not in ("own", "above"):
                     lvl = "own"
+                raw = qq.get("criteria", [""])[0]
+                old = {c.get("text", ""): c.get("id") for c in (gz.get("criteria") or [])}
+                newc, n = [], 0
+                for line in raw.split("\n"):
+                    t = line.strip()
+                    if not t:
+                        continue
+                    crit = t.startswith("!")
+                    if crit:
+                        t = t[1:].strip()
+                    if not t:
+                        continue
+                    n += 1
+                    cid = old.get(t) or ("c%d" % n)
+                    newc.append({"id": cid, "text": t, "critical": crit})
                 gz["name"] = name
                 gz["type"] = gtype
                 gz["level"] = lvl
+                gz["criteria"] = newc
                 st.save(data)
                 return self._redirect("/goals?grade=" + gk)
             if p == "/goals/edit":
