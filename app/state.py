@@ -74,12 +74,17 @@ DEMO_PROJECTS = [
 ]
 
 
-def _demo_scores(profile):
+def _demo_scores(profile, data=None):
     """Баллы по всем компетенциям согласно профилю приоритетов."""
     p1, p2, p3 = profile
     out = {}
-    comps = data.get("competencies") or [list(c) for c in config.COMPS]
-    for name, _cat, prio, _goal in comps:
+    comps = ((data or {}).get("competencies")) or [list(c) for c in config.COMPS]
+    for c in comps:
+        if not (isinstance(c, (list, tuple)) and len(c) >= 3):
+            continue
+        name, prio = c[0], c[2]
+        if prio not in (1, 2, 3):
+            continue
         out[name] = {1: p1, 2: p2, 3: p3}[prio]
     return out
 
@@ -101,10 +106,15 @@ def demo_state():
 def _normalize(data):
     """Приводим данные к актуальному справочнику компетенций."""
     comps = data.get("competencies") or [list(c) for c in config.COMPS]
-    names = [c[0] for c in comps]
+    names = [c[0] for c in comps if isinstance(c, (list, tuple)) and c]
+    nameset = set(names)
     for emp in data.get("employees", []):
         old = emp.get("scores") or {}
-        emp["scores"] = {n: old[n] for n in names if old.get(n) not in (None, "")}
+        if not isinstance(old, dict):
+            old = {}
+        merged = dict(old)
+        merged.update({n: old[n] for n in names if old.get(n) not in (None, "")})
+        emp["scores"] = merged
     data.setdefault("projects", [])
     if "competencies" not in data:
         data["competencies"] = [list(c) for c in config.COMPS]
