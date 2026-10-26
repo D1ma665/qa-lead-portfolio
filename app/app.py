@@ -383,11 +383,12 @@ def page_goals(data=None, grade=None):
         lvl = "выше грейда" if gz.get("level") == "above" else "свой"
         cards += (
             '<div class="card">'
-            '<a href="/goals/edit?grade=%s&amp;id=%s" style="float:right">&#9998; править</a>'
+            '<a href="/goals/del?grade=%s&amp;id=%s" style="float:right;margin-left:18px">&#10005;</a>' '<a href="/goals/edit?grade=%s&amp;id=%s" style="float:right">&#9998; править</a>'
             '<b>%s</b> <span class="muted">· %s · уровень: %s</span>'
             '<div class="muted">%s</div>'
             '<div style="margin-top:8px"><b>Критерии:</b></div>%s'
             '</div>' % (
+                e(grade), e(gz.get("id", "")),
                 e(grade), e(gz.get("id", "")),
                 e(gz.get("name", "")),
                 "стандартная" if gz.get("type") == "standard" else "доп. задача",
@@ -622,6 +623,15 @@ class H(BaseHTTPRequestHandler):
                 gz["type"] = gtype
                 gz["level"] = lvl
                 gz["criteria"] = newc
+                st.save(data)
+                return self._redirect("/goals?grade=" + gk)
+            if p == "/goals/del":
+                gk = qq.get("grade", [""])[0]
+                gid = qq.get("id", [""])[0]
+                lst = (data.get("goals_template", {}) or {}).get(gk) or []
+                if len(lst) <= 1:
+                    return self._redirect("/goals?grade=" + gk)
+                data["goals_template"][gk] = [x for x in lst if x.get("id") != gid]
                 st.save(data)
                 return self._redirect("/goals?grade=" + gk)
             if p == "/goals/new":
