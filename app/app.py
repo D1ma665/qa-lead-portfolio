@@ -58,7 +58,7 @@ button.del{background:var(--risk)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
 .kpi b{display:block;font-size:24px;margin-top:4px}
-.wrap{overflow-x:auto}
+.wrap{overflow-x:auto;table-layout:fixed}
 .prio1{color:#93c5fd}.prio2{color:#a7f3d0}.prio3{color:#fcd34d}
 .scores a{text-decoration:none}
 pre{background:#0f1216;border:1px solid var(--line);border-radius:8px;padding:12px;
