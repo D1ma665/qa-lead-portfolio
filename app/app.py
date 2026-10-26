@@ -419,7 +419,9 @@ def page_goals(data=None, grade=None):
         '<h3 style="margin-top:24px">Шаблон стандартных целей по грейдам</h3>'
         '<p class="muted">Шаблон стандартных целей по грейдам. '
         'По целям считается оценка A–E за квартал.</p>'
-        '<div style="margin:12px 0">' + tabs + '</div>'
+        '<div style="margin:12px 0">' + tabs
+        + (' <a href="/goals/new">+ Цель</a>' if grade else '')
+        + '</div>'
         + cards)
 
     return page("Цели", body, "goals")
@@ -441,6 +443,28 @@ def page_biz_edit(data, goal, msg=""):
         '<a href="/goals" style="margin-left:12px">Отмена</a>'
         '</form>')
     return page("Правка %s" % gk, body, "goals")
+
+
+def page_goal_new(data, grade, msg=""):
+    body = (
+        '<h2>Новая цель в грейде %s</h2>' % e(grade)
+        + ('<div class="card" style="color:#b00020">%s</div>' % e(msg) if msg else '')
+        + '<form method="get" action="/goals/add">'
+        + '<input type="hidden" name="grade" value="%s">' % e(grade)
+        + '<div style="margin:10px 0"><label>Название<br>'
+        + '<input name="name" style="width:520px"></label></div>'
+        + '<div style="margin:10px 0"><label>Тип<br><select name="type">'
+        + '<option value="standard">стандартная</option>'
+        + '<option value="extra">доп. задача</option></select></label></div>'
+        + '<div style="margin:10px 0"><label>Уровень<br><select name="level">'
+        + '<option value="own">свой</option>'
+        + '<option value="above">выше</option></select></label></div>'
+        + '<div style="margin:10px 0"><label>Критерии &mdash; по одному в строке, '
+        + 'с &#171;!&#187; в начале &mdash; критичный<br>'
+        + '<textarea name="criteria" rows="6" style="width:520px"></textarea></label></div>'
+        + '<button type="submit">Создать</button> '
+        + '<a href="/goals" style="margin-left:12px">Отмена</a></form>')
+    return page("Новая цель", body, "goals")
 
 
 def page_goal_edit(data, grade, gid, msg=""):
@@ -598,6 +622,41 @@ class H(BaseHTTPRequestHandler):
                 gz["type"] = gtype
                 gz["level"] = lvl
                 gz["criteria"] = newc
+                st.save(data)
+                return self._redirect("/goals?grade=" + gk)
+            if p == "/goals/new":
+                gr = qq.get("grade", ["middle1"])[0]
+                return self._send(page_goal_new(data, gr))
+            if p == "/goals/add":
+                gk = qq.get("grade", [""])[0]
+                name = qq.get("name", [""])[0].strip()
+                if not gk or not name:
+                    return self._send(page_goal_new(data, gk, "Название обязательно"))
+                tmpl = data.setdefault("goals_template", {})
+                lst = tmpl.setdefault(gk, [])
+                pre = {"middle1": "mid1", "middle2": "mid2", "middle3": "mid3",
+                       "middle4": "mid4", "senior5": "sen5", "senior6": "sen6"}.get(gk, gk[:4])
+                n = max([int(x["id"].rsplit("-", 1)[-1])
+                         for x in lst if "id" in x and x["id"].rsplit("-", 1)[-1].isdigit()] or [0]) + 1
+                gid = "%s-g-%02d" % (pre, n)
+                raw = qq.get("criteria", [""])[0]
+                crits = []
+                for line in raw.split("\n"):
+                    t = line.strip()
+                    if not t:
+                        continue
+                    c = t.startswith("!")
+                    if c:
+                        t = t[1:].strip()
+                    if t:
+                        crits.append({"id": "c%d" % (len(crits) + 1), "text": t, "critical": c})
+                lst.append({
+                    "id": gid,
+                    "name": name,
+                    "type": qq.get("type", ["standard"])[0],
+                    "level": qq.get("level", ["own"])[0],
+                    "criteria": crits,
+                })
                 st.save(data)
                 return self._redirect("/goals?grade=" + gk)
             if p == "/goals/edit":
