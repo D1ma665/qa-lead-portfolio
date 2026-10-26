@@ -138,7 +138,6 @@ def page_dashboard(data):
             ("Сотрудников", len(emps)),
             ("Компетенций", len(data.get("competencies") or [])),
             ("Проблем в покрытии", len(risk)),
-            ("Проектов под риском", len(proj_risk)),
         ]
     )
 
@@ -161,15 +160,6 @@ def page_dashboard(data):
         for r in comps_cov[:40]
     ) or '<tr><td colspan="6" class="muted">Все компетенции закрыты</td></tr>'
 
-    p_rows = "".join(
-        "<tr><td>" + e(p["name"]) + "</td><td>" + str(p["count"]) + "</td>"
-        '<td class="muted">' + e(", ".join(p["able"]) or "—") + "</td>"
-        '<td><span class="badge ' + p["status"] + '">'
-        + ("один человек" if p["status"] == "risk" else "тесно" if p["status"] == "warn" else "ок")
-        + "</span></td></tr>"
-        for p in proj_risk[:15]
-    ) or '<tr><td colspan="4" class="muted">Проекты покрыты</td></tr>'
-
     body = (
         "<h2>Дашборд</h2>"
         '<div class="grid">' + cards + "</div>"
@@ -181,7 +171,7 @@ def page_dashboard(data):
         "<th>Цель</th><th>Владеют</th><th>Кто</th><th>Статус</th></tr>" + r_rows + "</table></div>"
         "<h3>Проекты под риском (bus factor)</h3>"
         '<div class="card wrap"><table><tr><th>Проект</th><th>Могут подменить</th>'
-        "<th>Кто</th><th>Статус</th></tr>" + p_rows + "</table></div>"
+        "<th>Кто</th><th>Статус</th></tr>" + "</table></div>"
     )
     return page("Дашборд", body, "dashboard")
 
