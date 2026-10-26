@@ -383,10 +383,12 @@ def page_goals(data=None, grade=None):
         lvl = "выше грейда" if gz.get("level") == "above" else "свой"
         cards += (
             '<div class="card">'
+            '<a href="/goals/edit?grade=%s&amp;id=%s" style="float:right">&#9998; править</a>'
             '<b>%s</b> <span class="muted">· %s · уровень: %s</span>'
             '<div class="muted">%s</div>'
             '<div style="margin-top:8px"><b>Критерии:</b></div>%s'
             '</div>' % (
+                e(grade), e(gz.get("id", "")),
                 e(gz.get("name", "")),
                 "стандартная" if gz.get("type") == "standard" else "доп. задача",
                 lvl, e(gz.get("id", "")), crit))
@@ -439,6 +441,37 @@ def page_biz_edit(data, goal, msg=""):
         '<a href="/goals" style="margin-left:12px">Отмена</a>'
         '</form>')
     return page("Правка %s" % gk, body, "goals")
+
+
+def page_goal_edit(data, grade, gid, msg=""):
+    tmpl = (data or {}).get("goals_template") or {}
+    lst = tmpl.get(grade) or []
+    gz = next((x for x in lst if x.get("id") == gid), None)
+    if gz is None:
+        return page("Цель не найдена",
+                    '<div class="card">Цель %s в грейде %s не найдена. '
+                    '<a href="/goals">К списку</a></div>' % (e(gid), e(grade)), "goals")
+    body = (
+        '<h2>Правка цели</h2>'
+        + ('<div class="card" style="color:#b00020">%s</div>' % e(msg) if msg else '')
+        + '<form method="get" action="/goals/save">'
+        + '<input type="hidden" name="grade" value="%s">' % e(grade)
+        + '<input type="hidden" name="id" value="%s">' % e(gid)
+        + '<div style="margin:10px 0"><label>Название<br>'
+        + '<input name="name" value="%s" style="width:520px"></label></div>' % e(gz.get("name", ""))
+        + '<div style="margin:10px 0"><label>Тип<br><select name="type">'
+        + '<option value="standard"%s>стандартная</option>'
+        % (' selected' if gz.get("type") == "standard" else '')
+        + '<option value="extra"%s>доп. задача</option></select></label></div>'
+        % (' selected' if gz.get("type") != "standard" else '')
+        + '<div style="margin:10px 0"><label>Уровень<br><select name="level">'
+        + '<option value="own"%s>свой</option>'
+        % (' selected' if gz.get("level") == "own" else '')
+        + '<option value="above"%s>выше</option></select></label></div>'
+        % (' selected' if gz.get("level") == "above" else '')
+        + '<button type="submit">Сохранить</button> '
+        + '<a href="/goals?grade=%s" style="margin-left:12px">Отмена</a></form>' % e(grade))
+    return page("Правка цели", body, "goals")
 
 
 def page_projects(data, msg=""):
@@ -522,6 +555,9 @@ class H(BaseHTTPRequestHandler):
                 return self._send(page_matrix(data, qq.get("emp", [None])[0]))
             if p == "/comps":
                 return self._send(page_comps(data))
+            if p == "/goals/edit":
+                return self._send(page_goal_edit(
+                    data, qq.get("grade", [""])[0], qq.get("id", [""])[0]))
             if p == "/goals/biz_edit":
                 return self._send(page_biz_edit(data, qq.get("goal", [""])[0]))
             if p == "/goals/biz_save":
