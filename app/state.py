@@ -79,7 +79,7 @@ def _demo_scores(profile, data=None):
     """Баллы по всем компетенциям согласно профилю приоритетов."""
     p1, p2, p3 = profile
     out = {}
-    comps = ((data or {}).get("competencies")) or [list(c) for c in config.COMPS]
+    comps = [list(c) for c in config.COMPS]
     for c in comps:
         if not (isinstance(c, (list, tuple)) and len(c) >= 3):
             continue
@@ -107,7 +107,7 @@ def demo_state():
 
 def _normalize(data):
     """Приводим данные к актуальному справочнику компетенций."""
-    comps = data.get("competencies") or [list(c) for c in config.COMPS]
+    comps = [list(c) for c in config.COMPS]
     names = [c[0] for c in comps if isinstance(c, (list, tuple)) and c]
     nameset = set(names)
     for emp in data.get("employees", []):
@@ -119,7 +119,7 @@ def _normalize(data):
         emp["scores"] = merged
     data.setdefault("projects", [])
     if "competencies" not in data:
-        data["competencies"] = [list(c) for c in config.COMPS]
+        pass  # справочник = config.COMPS
     if "goals" not in data:
         data["goals"] = copy.deepcopy(getattr(config, "GOALS", ())) or {}
     if "goals_template" not in data:
