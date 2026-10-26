@@ -233,3 +233,24 @@ def project_coverage(data, risk_min=None):
         })
     rows.sort(key=lambda r: (r["status"] != "risk", r["status"] != "warn", r["name"]))
     return rows
+
+
+def add_employee(data, name, salary=0, scores=None):
+    """Добавляет сотрудника. Возвращает False, если ФИО пустое или уже есть."""
+    name = (name or "").strip()
+    if not name:
+        return False
+    for e in data.get("employees", []):
+        if e.get("name", "").lower() == name.lower():
+            return False
+    try:
+        salary = int(salary or 0)
+    except (TypeError, ValueError):
+        salary = 0
+    data.setdefault("employees", []).append({
+        "name": name,
+        "salary": salary,
+        "scores": dict(scores or {}),
+    })
+    save(data)
+    return True

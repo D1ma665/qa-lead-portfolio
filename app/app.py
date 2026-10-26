@@ -250,6 +250,11 @@ def page_team(data):
         )
 
     body = (
+        '<div class="card"><form method="get" action="/addemp" '
+        'style="display:flex;gap:8px;flex-wrap:wrap">'
+        '<input name="name" placeholder="ФИО" required style="min-width:220px">'
+        '<input name="salary" type="number" min="0" placeholder="Оклад">'
+        '<button>Добавить сотрудника</button></form></div>'
         "<h2>Команда</h2>"
         '<p class="muted">Грейд считается по компетенциям (система планок). '
         "Оценка A–E по целям — Этап 2.</p>"
@@ -541,7 +546,7 @@ class H(BaseHTTPRequestHandler):
 
     def do_GET(self):
         u = urlparse(self.path)
-        qq = parse_qs(u.query)
+        qq = parse_qs(u.query, encoding="utf-8")
         p = u.path
         try:
             data = st.load()
@@ -680,6 +685,12 @@ class H(BaseHTTPRequestHandler):
                 busy = st.remove_employee(data, nm)
                 st.save(data)
                 msg = "Владелец проектов: " + ", ".join(busy) if busy else "Удалён"
+                return self._redirect("/team?msg=" + quote(msg, safe=""))
+
+            if p == "/addemp":
+                ok = st.add_employee(data, qq.get("name", [""])[0],
+                                     qq.get("salary", ["0"])[0])
+                msg = "Добавлен" if ok else "ФИО пустое или уже есть"
                 return self._redirect("/team?msg=" + quote(msg, safe=""))
 
             if p == "/comps":
