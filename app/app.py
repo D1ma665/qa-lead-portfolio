@@ -429,7 +429,7 @@ def page_biz_edit(data, goal, msg=""):
     body = (
         '<h2>Бизнес-цель %s</h2>' % e(gk)
         + ('<div class="card" style="color:#b00020">%s</div>' % e(msg) if msg else '')
-        + '<form method="post" action="/goals/biz_save">'
+        + '<form method="get" action="/goals/biz_save">'
         '<input type="hidden" name="goal" value="%s">' % e(gk)
         + '<div style="margin:10px 0"><label>Название<br>'
         '<input name="name" value="%s" style="width:420px"></label></div>' % e(gd.get("name", ""))
@@ -525,7 +525,7 @@ class H(BaseHTTPRequestHandler):
             if p == "/goals/biz_edit":
                 return self._send(page_biz_edit(data, qq.get("goal", [""])[0]))
             if p == "/goals/biz_save":
-                f = parse_qs(body or "")
+                f = qq
                 gk = f.get("goal", [""])[0]
                 name = f.get("name", [""])[0].strip()
                 mets = [x.strip() for x in f.get("metrics", [""])[0].split("\n") if x.strip()]
