@@ -156,17 +156,30 @@ def find_employee(data, name):
     return None
 
 
-def set_score(data, emp_name, comp, value):
-    emp = find_employee(data, emp_name)
-    if not emp:
+def set_score(data, emp, comp, value):
+    emp = (emp or "").strip()
+    comp = (comp or "").strip()
+    if not emp or not comp:
         return False
-    if value in (None, "", 0, "0"):
-        emp["scores"].pop(comp, None)
-    else:
-        emp["scores"][comp] = int(value)
-    save(data)
-    return True
-
+    try:
+        v = int(value)
+    except (TypeError, ValueError):
+        return False
+    if v == 0:
+        for e in data.get("employees", []):
+            if e.get("name", "").strip() == emp:
+                e.get("scores", {}).pop(comp, None)
+                save(data)
+                return True
+        return False
+    if not 1 <= v <= 5:
+        return False
+    for e in data.get("employees", []):
+        if e.get("name", "").strip() == emp:
+            e.setdefault("scores", {})[comp] = v
+            save(data)
+            return True
+    return False
 
 # ------------------------------------------------ проекты (слой данных)
 
