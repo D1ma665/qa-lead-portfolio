@@ -211,7 +211,7 @@ def project_coverage(data, risk_min=None):
         risk_min = config.BUS_FACTOR_RISK
     rows = []
     for p in data.get("projects", []):
-        able = {n: s for n, s in p.get("owners", {}).items() if s >= 3}
+        able = {n: s for n, s in p.get("owners", {}).items() if s >= config.BUS_FACTOR_RISK}
         n = len(able)
         rows.append({
             "name": p["name"],

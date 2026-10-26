@@ -58,7 +58,7 @@ button.del{background:var(--risk)}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px}
 .kpi b{display:block;font-size:24px;margin-top:4px}
-.wrap{overflow-x:auto;table-layout:fixed}
+.wrap{overflow-x:auto;table-layout:fixed;width:100%}
 .prio1{color:#93c5fd}.prio2{color:#a7f3d0}.prio3{color:#fcd34d}
 .scores a{text-decoration:none}
 pre{background:#0f1216;border:1px solid var(--line);border-radius:8px;padding:12px;
@@ -482,7 +482,7 @@ def page_projects(data, msg=""):
             "<tr><td><b>" + e(p["name"]) + "</b></td><td>" + str(len(p["owners"])) + "</td>"
             '<td class="muted">' + e(owners) + "</td><td>" + str(p["count"]) + "</td>"
             '<td><span class="badge ' + p["status"] + '">'
-            + ("один человек" if p["status"] == "risk" else "тесно" if p["status"] == "warn" else "ок")
+            + ("мало людей" if p["status"] == "risk" else "тесно" if p["status"] == "warn" else "ок")
             + "</span></td>"
             '<td><a href="/delproject?name=' + q(p["name"])
             + '"><button class="del">удалить</button></a></td></tr>'
@@ -492,7 +492,7 @@ def page_projects(data, msg=""):
     body = (
         "<h2>Проекты</h2>"
         '<p class="muted">Проекты — отдельный слой данных (не компетенции). '
-        "Bus factor: один человек на проекте — риск.</p>"
+        "Bus factor: мало людей на проекте — риск.</p>"
         + ('<div class="card"><b>' + e(msg) + "</b></div>" if msg else "")
         + '<div class="card"><form method="get" action="/addproject" '
         'style="display:flex;gap:8px;flex-wrap:wrap">'
@@ -502,7 +502,7 @@ def page_projects(data, msg=""):
         "<button>Добавить</button></form></div>"
         '<div class="card wrap"><table>'
         "<tr><th>Проект</th><th>Людей</th><th>Владельцы (балл)</th>"
-        "<th>Могут подменить</th><th>Статус</th><th></th></tr>"
+        "<th>Сильных владельцев (≥2)</th><th>Статус</th><th></th></tr>"
         + (rows or '<tr><td colspan="6" class="muted">Проектов нет</td></tr>')
         + "</table></div>"
     )
