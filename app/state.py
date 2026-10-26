@@ -98,6 +98,7 @@ def demo_state():
     return {"employees": emps,
             "projects": [dict(p) for p in DEMO_PROJECTS],
             "goals_template": copy.deepcopy(config.GOALS_TEMPLATE),
+        "goals": copy.deepcopy(getattr(config, "GOALS", ())) or {},
             "competencies": [list(c) for c in config.COMPS]}
 
 
@@ -118,6 +119,8 @@ def _normalize(data):
     data.setdefault("projects", [])
     if "competencies" not in data:
         data["competencies"] = [list(c) for c in config.COMPS]
+    if "goals" not in data:
+        data["goals"] = copy.deepcopy(getattr(config, "GOALS", ())) or {}
     if "goals_template" not in data:
         data["goals_template"] = copy.deepcopy(getattr(config, "GOALS_TEMPLATE", {}))
     return data
