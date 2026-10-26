@@ -190,6 +190,17 @@ def remove_project(data, name):
     save(data)
 
 
+def remove_employee(data, name):
+    """Удаляет сотрудника. Возвращает проекты, где он владелец (тогда не удаляет)."""
+    busy = [p.get("name", "") for p in data.get("projects", [])
+            if name in p.get("owners", {})]
+    if busy:
+        return busy
+    data["employees"] = [e for e in data.get("employees", [])
+                         if e.get("name") != name]
+    return []
+
+
 def assign_owner(data, project, owner, score=3):
     for p in data["projects"]:
         if p["name"] == project:

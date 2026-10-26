@@ -675,6 +675,13 @@ class H(BaseHTTPRequestHandler):
                 st.remove_project(data, qq.get("name", [""])[0])
                 return self._redirect("/projects")
 
+            if p == "/emp/del":
+                nm = qq.get("name", [""])[0]
+                busy = st.remove_employee(data, nm)
+                st.save(data)
+                msg = "Владелец проектов: " + ", ".join(busy) if busy else "Удалён"
+                return self._redirect("/team?msg=" + quote(msg, safe=""))
+
             if p == "/comps":
                 return self._send(page_comps(data))
             if p == "/comps/edit":
