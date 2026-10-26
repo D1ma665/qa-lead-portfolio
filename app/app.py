@@ -113,8 +113,8 @@ def page_dashboard(data):
     _who = {}
     for _e in emps:
         _en = _e.get("name") if isinstance(_e, dict) else _e[0]
-        _s = (_e.get("scores") if isinstance(_e, dict) else None) or {}
-        for _k, _v in _s.items():
+        _sc = grading.scores_for(e) if isinstance(e, dict) else {}
+        for k, v in _sc.items():
             if _v:
                 _cnt[_k] = _cnt.get(_k, 0) + 1
                 _who.setdefault(_k, []).append(_en)
@@ -725,7 +725,8 @@ class H(BaseHTTPRequestHandler):
                 if cur is not None:
                     if old != name:
                         for emp in data.get("employees", []):
-                            sc = emp.get("scores") or {}
+                            sc = emp.setdefault("scores", {}).setdefault(
+                getattr(config, "PERIOD_DEFAULT", "2026-Q4"), {})
                             if old in sc:
                                 sc[name] = sc.pop(old)
                     cur[0], cur[1], cur[2], cur[3] = name, cat, prio, code
