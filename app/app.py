@@ -123,7 +123,8 @@ def page_dashboard(data):
         if _prio not in (1, 2):
             continue
         _own = _cnt.get(_name, 0)
-        _st = "risk" if _own <= len(emps) - 2 else "warn" if _own <= len(emps) - 1 else "ok"
+        _need = len(emps)
+        _st = "risk" if _own <= _need - 2 else ("warn" if _own == _need - 1 else "ok")
         comps_cov.append({"comp": _name, "prio": _prio, "goal": _c[3] if len(_c) > 3 else "",
                           "count": _own, "need": len(emps), "status": _st,
                           "owners": _who.get(_name, [])})
@@ -155,7 +156,7 @@ def page_dashboard(data):
         "<td>" + str(r["count"]) + " / " + str(r["need"]) + "</td>"
         '<td class="muted">' + e(", ".join(r["owners"]) or "—") + "</td>"
         '<td><span class="badge ' + r["status"] + '">'
-        + ("дыра" if r["status"] == "risk" else "мало" if r["status"] == "warn" else "ок")
+        + ("не покрыто" if r["status"] == "risk" else "мало" if r["status"] == "warn" else "ок")
         + "</span></td></tr>"
         for r in comps_cov[:40]
     ) or '<tr><td colspan="6" class="muted">Все компетенции закрыты</td></tr>'
@@ -294,6 +295,9 @@ def page_team(data):
 
 
 def page_matrix(data, emp_name=None):
+    if data is None:
+        data = st.load()
+    comps = (data or {}).get("competencies") or list(config.COMPS)
     emps = [x["name"] for x in data["employees"]]
     if not emps:
         return page("Оценки", "<h2>Оценки</h2><div class='card'>Нет сотрудников</div>", "matrix")
@@ -308,7 +312,7 @@ def page_matrix(data, emp_name=None):
     )
 
     rows = ""
-    for name, cat, prio, goal in config.COMPS:
+    for name, cat, prio, goal in comps:
         val = (emp or {}).get("scores", {}).get(name)
         cells = ""
         for s in (1, 2, 3, 4, 5):
@@ -390,14 +394,52 @@ def page_goals(data=None, grade=None):
     if not cards:
         cards = '<div class="card muted">У этого грейда целей пока нет.</div>'
 
+    biz = (data or {}).get("goals") or {}
+    bparts = []
+    for gk in ("Ц1", "Ц2", "Ц3"):
+        gd = biz.get(gk) or {}
+        mets = "".join(
+            '<li style="margin:2px 0">%s</li>' % e(m) for m in (gd.get("metrics") or []))
+        bparts.append(
+            '<div class="card" style="margin:10px 0">'
+            '<div><b>%s</b> &middot; %s '
+            '<a href="/goals/biz_edit?goal=%s" style="margin-left:8px">&#9998; править</a></div>'
+            '<div class="muted" style="margin-top:6px">Метрики:</div>'
+            '<ul style="margin:4px 0 0 18px;padding:0">%s</ul>'
+            '</div>' % (e(gk), e(gd.get("name", "")), e(gk), mets))
+
     body = (
         '<h2>Цели</h2>'
+        '<h3 style="margin-top:16px">Бизнес-цели команды</h3>'
+        '<p class="muted">Ц1–Ц3 и их метрики. К целям привязаны компетенции '
+        'в матрице; правка не меняет закрытые кварталы.</p>'
+        + "".join(bparts) +
+        '<h3 style="margin-top:24px">Шаблон стандартных целей по грейдам</h3>'
         '<p class="muted">Шаблон стандартных целей по грейдам. '
         'По целям считается оценка A–E за квартал.</p>'
         '<div style="margin:12px 0">' + tabs + '</div>'
         + cards)
 
     return page("Цели", body, "goals")
+
+def page_biz_edit(data, goal, msg=""):
+    gk = goal if goal in ("Ц1", "Ц2", "Ц3") else "Ц1"
+    gd = (data.get("goals") or {}).get(gk) or {}
+    mets = "\n".join(gd.get("metrics") or [])
+    body = (
+        '<h2>Бизнес-цель %s</h2>' % e(gk)
+        + ('<div class="card" style="color:#b00020">%s</div>' % e(msg) if msg else '')
+        + '<form method="post" action="/goals/biz_save">'
+        '<input type="hidden" name="goal" value="%s">' % e(gk)
+        + '<div style="margin:10px 0"><label>Название<br>'
+        '<input name="name" value="%s" style="width:420px"></label></div>' % e(gd.get("name", ""))
+        + '<div style="margin:10px 0"><label>Метрики — по одной в строке<br>'
+        '<textarea name="metrics" rows="10" style="width:520px">%s</textarea></label></div>' % e(mets)
+        + '<button type="submit">Сохранить</button> '
+        '<a href="/goals" style="margin-left:12px">Отмена</a>'
+        '</form>')
+    return page("Правка %s" % gk, body, "goals")
+
 
 def page_projects(data, msg=""):
     emps = [x["name"] for x in data["employees"]]
@@ -480,6 +522,19 @@ class H(BaseHTTPRequestHandler):
                 return self._send(page_matrix(data, qq.get("emp", [None])[0]))
             if p == "/comps":
                 return self._send(page_comps(data))
+            if p == "/goals/biz_edit":
+                return self._send(page_biz_edit(data, qq.get("goal", [""])[0]))
+            if p == "/goals/biz_save":
+                f = parse_qs(body or "")
+                gk = f.get("goal", [""])[0]
+                name = f.get("name", [""])[0].strip()
+                mets = [x.strip() for x in f.get("metrics", [""])[0].split("\n") if x.strip()]
+                d = data
+                if gk in ("Ц1", "Ц2", "Ц3") and name:
+                    d.setdefault("goals", {})[gk] = {"name": name, "metrics": mets}
+                    st.save(d)
+                    return self._redirect("/goals")
+                return self._send(page_biz_edit(d, gk, "Название не может быть пустым"))
             if p == "/goals":
                 return self._send(page_goals(data, qq.get("grade", [None])[0]))
             if p == "/projects":
