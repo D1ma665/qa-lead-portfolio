@@ -156,7 +156,7 @@ def find_employee(data, name):
     return None
 
 
-def set_score(data, emp, comp, value):
+def set_score(data, emp, comp, value, period=None):
     emp = (emp or "").strip()
     comp = (comp or "").strip()
     if not emp or not comp:
@@ -165,21 +165,22 @@ def set_score(data, emp, comp, value):
         v = int(value)
     except (TypeError, ValueError):
         return False
-    if v == 0:
-        for e in data.get("employees", []):
-            if e.get("name", "").strip() == emp:
-                e.get("scores", {}).pop(comp, None)
-                save(data)
-                return True
+    if v != 0 and not 1 <= v <= 5:
         return False
-    if not 1 <= v <= 5:
+    period = period or getattr(config, "PERIOD_DEFAULT", None)
+    if not period:
         return False
     for e in data.get("employees", []):
-        if e.get("name", "").strip() == emp:
-            e.setdefault("scores", {})[comp] = v
+        if e.get("name", "").strip().lower() == emp.lower():
+            bucket = e.setdefault("scores", {}).setdefault(period, {})
+            if v == 0:
+                bucket.pop(comp, None)
+            else:
+                bucket[comp] = v
             save(data)
             return True
     return False
+
 
 # ------------------------------------------------ проекты (слой данных)
 
