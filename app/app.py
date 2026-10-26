@@ -169,9 +169,6 @@ def page_dashboard(data):
         "<h3>Риски покрытия компетенций (порог 3 балла)</h3>"
         '<div class="card wrap"><table><tr><th>Компетенция</th><th>Приоритет</th>'
         "<th>Цель</th><th>Владеют</th><th>Кто</th><th>Статус</th></tr>" + r_rows + "</table></div>"
-        "<h3>Проекты под риском (bus factor)</h3>"
-        '<div class="card wrap"><table><tr><th>Проект</th><th>Могут подменить</th>'
-        "<th>Кто</th><th>Статус</th></tr>" + "</table></div>"
     )
     return page("Дашборд", body, "dashboard")
 
