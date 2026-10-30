@@ -5,3 +5,9 @@ __pycache__/
 .venv/
 state.json
 QA_System.xlsx
+
+# локальный склад разовых скриптов и черновиков
+app/_archive/
+
+# резервные копии данных
+backups/
