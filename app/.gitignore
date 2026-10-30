@@ -1,10 +1,18 @@
-patch*.py
-*.pyn
-*.bak
-*.old
-*.broken
-*.broken2
+# окружение
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+
+# локальные бэкапы и мусор
+backups/
 *.bak
 *.old*
-app.py.broken*
-backups/
+*.broken*
+*.pyn
+
+# данные приложения — не в git
+state.json
+
+# одноразовые патчи
+patch*.py

@@ -18,7 +18,9 @@ import traceback
 import urllib.parse
 
 import config
+from page_scores import page_scores as scores_body
 import grading
+import grading_compat as compat
 import state as st
 
 HOST, PORT = "127.0.0.1", 8080
@@ -65,8 +67,8 @@ pre{background:#0f1216;border:1px solid var(--line);border-radius:8px;padding:12
 overflow:auto;font-size:12px;color:#fca5a5}
 """
 
-TABS = [("dashboard", "Дашборд"), ("team", "Команда"), ("matrix", "Оценки"),
-        ("comps", "Компетенции"), ("goals", "Цели"), ("projects", "Проекты")]
+TABS = [("dashboard", "Дашборд"), ("team", "Команда"), ("scores", "Результаты"),
+        ("matrix", "Оценки"), ("comps", "Компетенции"), ("goals", "Цели"), ("projects", "Проекты")]
 
 
 def nav_html(active):
@@ -102,11 +104,10 @@ def page_dashboard(data):
     emps = data["employees"]
     grades = {}
     for emp in emps:
-        code, name = grading.grade_of(emp)
+        code, name = compat.grade_of(emp)
         grades[name] = grades.get(name, 0) + 1
 
-    cov = grading.coverage(emps)
-    risk = [r for r in cov if r["status"] == "risk"]
+    cov = compat.coverage(emps)
     comps_cov = []
     _emp_names = [e.get("name") for e in data.get("employees") or []
                   if isinstance(e, dict) and e.get("name")]
@@ -114,11 +115,11 @@ def page_dashboard(data):
     _who = {}
     for _e in emps:
         _en = _e.get("name") if isinstance(_e, dict) else ""
-        _sc = grading.scores_for(e) if isinstance(e, dict) else {}
+        _sc = compat.scores_for(_e) if isinstance(_e, dict) else {}
         for k, v in _sc.items():
-            if _v:
-                _cnt[_k] = _cnt.get(_k, 0) + 1
-                _who.setdefault(_k, []).append(_en)
+            if v:
+                _cnt[k] = _cnt.get(k, 0) + 1
+                _who.setdefault(k, []).append(_en)
     for _c in (data.get("competencies") or []):
         _name, _cat, _prio = _c[0], _c[1], _c[2]
         if _prio not in (1, 2):
@@ -130,6 +131,7 @@ def page_dashboard(data):
                           "count": _own, "need": len(emps), "status": _st,
                           "owners": _who.get(_name, [])})
 
+    risk = [r for r in comps_cov if r["status"] == "risk"]
     projects = st.project_coverage(data)
     proj_risk = [p for p in projects if p["status"] == "risk"]
 
@@ -229,22 +231,31 @@ def page_team(data):
     grade_names = dict((g[0], g[1]) for g in config.GRADES)
     rows = ""
     for emp in [x for x in data.get("employees") or [] if isinstance(x, dict)]:
-        code, name = grading.grade_of(emp)
-        nxt_code, checks = grading.next_grade_gap(emp)
+        gcode, gname = compat.grade_of(emp)
+        fio = emp.get("name", "—")
+        nxt_code, checks = compat.next_grade_gap(emp)
         done = sum(1 for c in checks if c["ok"])
-        prog = (str(done) + "/" + str(len(checks))) if checks else "максимум"
-        goals = grading.goal_breakdown(emp)
-        gtxt = " · ".join(g + ": " + str(v) for g, v in goals.items() if v)
-        k = config.GRADE_K.get(code, "—")
-        salary = str(int(emp.get("salary", 0))).replace(",", " ")
+        prog = (str(done) + "/" + str(len(checks))) if checks else "грейд не определён"
+        try:
+            r = grading.evaluate(emp, compat._goals_for(emp))
+        except Exception as exc:          # страница не падает из-за одной строки
+            r = {"kpi_percent": None, "letter": None, "bonus": 0,
+                 "bonus_pct": None, "deploy": None}
+            print("team/evaluate:", fio, exc)
+        kpi_txt = "—" if r["kpi_percent"] is None else str(r["kpi_percent"]) + "%"
+        letter_txt = r["letter"] or "—"
+        salary = "{:,.0f}".format(float(emp.get("salary") or 0)).replace(",", " ")
+        bonus_txt = ("—" if r.get("bonus_pct") is None else "{:,.0f} ₽".format(r.get("bonus") or 0).replace(",", " "))
         rows += (
-        "<tr><td><b>" + str(name) + "</b></td>"
+        "<tr><td><b>" + e(fio) + "</b></td>"
             "<td>" + salary + " ₽</td>"
-        "<td>" + str(name) + "</td>"
-            "<td>" + str(grading.average(emp)) + "</td>"
-            "<td>×" + str(k) + "</td>"
-            '<td class="muted">' + e(gtxt) + "</td>"
-            "<td>→ " + e(grade_names.get(nxt_code, "—"))
+        "<td>" + e(gname or "—") + "</td>"
+            "<td>" + str(compat.average(emp)) + "</td>"
+            "<td><b>" + e(letter_txt) + "</b></td>"
+            "<td>" + e(kpi_txt) + "</td>"
+            "<td>" + ("—" if r.get("fill_percent") is None else "{:.0f}%".format(r["fill_percent"])) + "</td>" +
+            "<td>" + e(bonus_txt) + "</td>"
+            "<td>→ " + e(nxt_code or "грейд не определён")
             + ' <span class="muted">(' + prog + ")</span></td>"
             '<td><a href="/matrix?emp=' + q(emp.get("name", "-")) + '">'
             '<button class="ghost">оценки</button></a></td></tr>'
@@ -258,11 +269,15 @@ def page_team(data):
         '<button>Добавить сотрудника</button></form></div>'
         "<h2>Команда</h2>"
         '<p class="muted">Грейд считается по компетенциям (система планок). '
-        "Оценка A–E по целям — Этап 2.</p>"
+        "Буква и КПИ считаются по целям с весами 40/40/20, премия — оклад × 20% × (1 + доля грейда) × коэффициент буквы.</p>"
         '<div class="card wrap"><table>'
         "<tr><th>Сотрудник</th><th>Оклад</th><th>Грейд</th><th>Средний балл</th>"
-        "<th>K грейда</th><th>Срез по целям</th><th>До следующего грейда</th><th></th></tr>"
+        "<th>Буква</th><th>КПИ</th><th>Анкета</th><th>Премия</th><th>До следующего грейда</th><th></th></tr>"
         + rows + "</table></div>"
+        '<p class="muted"><b>Почему премия 0 ₽.</b> Премия не начисляется, '
+        "если анкета компетенций заполнена на 90% и меньше (колонка «Анкета»), "
+        "либо если оценок не было ни одной — тогда грейд взят фолбэком. "
+        "Буква A при анкете 90% тоже даёт 0 ₽.</p>"
     )
     return page("Команда", body, "team")
 
@@ -286,7 +301,7 @@ def page_matrix(data, emp_name=None):
 
     rows = ""
     for name, cat, prio, goal in comps:
-        val = grading.scores_for(emp).get(name, 0)
+        val = compat.scores_for(emp).get(name, 0)
         cells = ""
         for s in (1, 2, 3, 4, 5):
             url = "/set?emp=" + q(emp_name) + "&comp=" + q(name) + "&v=" + str(s)
@@ -305,15 +320,15 @@ def page_matrix(data, emp_name=None):
 
     info = ""
     if emp:
-        code, gname = grading.grade_of(emp)
-        nxt, checks = grading.next_grade_gap(emp)
+        code, gname = compat.grade_of(emp)
+        nxt, checks = compat.next_grade_gap(emp)
         items = "".join(
             "<li>" + ("✅" if c["ok"] else "❌") + " " + e(c["text"]) + "</li>"
             for c in checks
         ) or "<li class='muted'>Грейд максимальный</li>"
         info = (
             '<div class="card"><b>' + e(emp.get("name", "-")) + "</b> — " + e(gname)
-            + " · средний балл " + str(grading.average(emp))
+            + " · средний балл " + str(compat.average(emp))
             + '<h3 style="margin-bottom:6px">До следующего грейда ('
             + e(dict((g[0], g[1]) for g in config.GRADES).get(nxt, "—")) + ")</h3>"
             '<ul style="margin:0;padding-left:18px">' + items + "</ul></div>"
@@ -560,6 +575,8 @@ class H(BaseHTTPRequestHandler):
                 return self._send(page_matrix(data, qq.get("emp", [None])[0]))
             if p == "/comps":
                 return self._send(page_comps(data))
+            if p == "/scores":
+                return self._send(page("Оценки", scores_body(data), "scores"))
             if p == "/goals/save":
                 gk = qq.get("grade", [""])[0]
                 gid = qq.get("id", [""])[0]
@@ -696,6 +713,8 @@ class H(BaseHTTPRequestHandler):
 
             if p == "/comps":
                 return self._send(page_comps(data))
+            if p == "/scores":
+                return self._send(page("Оценки", scores_body(data), "scores"))
             if p == "/comps/edit":
                 nm = qq.get("name", [""])[0]
                 comps = data.get("competencies") or []
