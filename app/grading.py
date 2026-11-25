@@ -191,7 +191,7 @@ def bonus(salary, grade_share, letter):
 def bonus_pct(grade_share, letter):
     """Та же премия в процентах оклада — для отчётности."""
     if letter is None:
-        return 0.0
+        return None
     k = config.MARK_K.get(letter, 0.0)
     return round(config.BONUS_BASE_RATE * (1 + grade_share) * k * 100, 1)
 
@@ -203,9 +203,11 @@ def evaluate(employee, goals, period=None):
     period = period or config.PERIOD_DEFAULT
     percent = weighted_percent(goals)
     deploy = overall_deploy(goals)
-    letter = letter_for(percent, deploy)
-
     gr = grade_with_fallback(employee, period)
+
+    # §4.4.3 / находка 6.14: без грейда (оценок не было никогда) буква
+    # не считается — иначе сотрудник получает C, D или E «из воздуха».
+    letter = None if gr["source"] == "default" else letter_for(percent, deploy)
 
     # Неполная анкета (решение 29.10.2026): если оценено 90% и меньше
     # приоритетных компетенций, премия не начисляется. Средний балл считается

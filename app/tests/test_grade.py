@@ -17,8 +17,22 @@ import grading_compat as compat
 # -------------------------------------------------------- вспомогательное
 
 def _emp(scores=None, name="Тест Т.Т.", salary=100_000):
+    # Схема как в state.json: emp["scores"][период] = {компетенция: балл}.
+    # scores_for (grading_compat) читает именно этот путь, не periods.
     return {"name": name, "salary": salary,
-            "periods": {"2026-Q4": {"scores": scores or {}}}}
+            "scores": {"2026-Q4": scores or {}}}
+
+
+P1 = [c[0] for c in config.COMPS if c[2] == 1]
+
+
+def _profile(score=3.6, n=20):
+    """Оценённая анкета: n приоритетных компетенций с баллом score.
+
+    Нужна, чтобы grade_source стал "scores": при пустой анкете source =
+    "default" и буква по §4.4.3/6.14 не считается.
+    """
+    return dict((name, score) for name in P1[:n])
 
 
 def _goal(c, fact=100, deploy="deployed"):
@@ -129,7 +143,7 @@ def test_bonus_pct_consistent_with_bonus():
 
 def test_evaluate_yakin():
     """Живые данные: 75/70/80 при планах 100 -> 74.0, буква C."""
-    r = grading.evaluate(_emp(name="Якин А.В."),
+    r = grading.evaluate(_emp(_profile(), name="Якин А.В."),
                          [_goal("Ц1", 75), _goal("Ц2", 70), _goal("Ц3", 80)],
                          "2026-Q4")
     assert r["kpi_percent"] == pytest.approx(74.0)
@@ -155,10 +169,10 @@ def test_evaluate_no_goals():
 def test_evaluate_a_vs_b():
     """A требует in_use, иначе B при тех же 100%+."""
     goals = [_goal("Ц1", 120), _goal("Ц2", 120), _goal("Ц3", 120)]
-    assert grading.evaluate(_emp(), goals, "2026-Q4")["letter"] == "B"
+    assert grading.evaluate(_emp(_profile()), goals, "2026-Q4")["letter"] == "B"
     for g in goals:
         g["deploy"] = "in_use"
-    assert grading.evaluate(_emp(), goals, "2026-Q4")["letter"] == "A"
+    assert grading.evaluate(_emp(_profile()), goals, "2026-Q4")["letter"] == "A"
 
 
 # -------------------------------------------------------- п. 6.1 — путь целей

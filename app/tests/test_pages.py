@@ -82,11 +82,22 @@ def test_goals_for_falls_back_to_store():
     assert [x.get("c") for x in goals] == ["Ц1", "Ц2", "Ц3"]
 
 
-def test_state_has_13_employees():
+@pytest.mark.data
+def test_state_has_expected_employees():
+    """6.16: сотрудников не меньше ожидаемого.
+
+    Ловит потерю людей при миграции, но не падает от добавления нового:
+    магическое == 13 ломалось при каждом новом сотруднике.
+    """
     state = json.loads((APP / "state.json").read_text(encoding="utf-8"))
-    assert len(state.get("employees", [])) == 13
+    people = state.get("employees") or []
+    assert len(people) >= 13, (
+        "сотрудников стало меньше: %d < 13" % len(people))
+    names = [e.get("name") for e in people]
+    assert all(names), "у сотрудника нет имени"
+    assert len(names) == len(set(names)), "дубли в списке сотрудников"
 
-
+@pytest.mark.data
 def test_employee_goals_use_valid_deploy():
     state = json.loads((APP / "state.json").read_text(encoding="utf-8"))
     allowed = {None, "none", "deployed", "in_use"}
